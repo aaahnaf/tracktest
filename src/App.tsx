@@ -1,20 +1,24 @@
 import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { GridIcon, ListIcon, ChartIcon, SettingsIcon, PlusIcon } from './components/Icons';
+import { GridIcon, ListIcon, ChartIcon, SettingsIcon, PlusIcon, HeartIcon } from './components/Icons';
 import { useExpenses } from './hooks/useExpenses';
 import { useSettings } from './hooks/useSettings';
 import { useTheme } from './hooks/useTheme';
 import { Page, Expense } from './lib/types';
 import { Overview } from './components/Overview';
 import { Transactions } from './components/Transactions';
+import { Memory } from './components/Memory';
 import { Analytics } from './components/Analytics';
+import { Replay } from './components/Replay';
 import { Settings } from './components/Settings';
 import { AddExpenseModal } from './components/AddExpenseModal';
 
 const NAV_ITEMS: { id: Page; label: string; icon: any }[] = [
   { id: 'overview', label: 'Overview', icon: GridIcon },
   { id: 'transactions', label: 'Transactions', icon: ListIcon },
+  { id: 'memory', label: 'Memory', icon: HeartIcon },
   { id: 'analytics', label: 'Analytics', icon: ChartIcon },
+  { id: 'replay', label: 'Replay', icon: ChartIcon },
   { id: 'settings', label: 'Settings', icon: SettingsIcon },
 ];
 
@@ -171,8 +175,21 @@ export default function App() {
                     onDelete={deleteExpense}
                   />
                 )}
+                {page === 'memory' && (
+                  <Memory
+                    expenses={expenses}
+                    currency={settings.currency}
+                    onEditExpense={handleEdit}
+                  />
+                )}
                 {page === 'analytics' && (
                   <Analytics
+                    expenses={expenses}
+                    currency={settings.currency}
+                  />
+                )}
+                {page === 'replay' && (
+                  <Replay
                     expenses={expenses}
                     currency={settings.currency}
                   />
@@ -193,23 +210,29 @@ export default function App() {
       {/* Mobile Bottom Navigation */}
       <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-[var(--bg)]/95 backdrop-blur-xl border-t border-[var(--border)] safe-bottom z-40">
         <div className="flex items-center justify-around px-1 pt-2 pb-1">
-          {NAV_ITEMS.slice(0, 2).map(item => {
-            const Icon = item.icon;
-            const isActive = page === item.id;
-            return (
-              <motion.button
-                key={item.id}
-                whileTap={{ scale: 0.9 }}
-                onClick={() => setPage(item.id)}
-                className={`flex flex-col items-center gap-1 px-3 py-2 rounded-xl transition-all min-w-[60px] ${
-                  isActive ? 'text-[var(--text-primary)]' : 'text-[var(--text-tertiary)]'
-                }`}
-              >
-                <Icon size={20} />
-                <span className="text-[10px] font-medium">{item.label}</span>
-              </motion.button>
-            );
-          })}
+          {/* Overview */}
+          <motion.button
+            whileTap={{ scale: 0.9 }}
+            onClick={() => setPage('overview')}
+            className={`flex flex-col items-center gap-1 px-3 py-2 rounded-xl transition-all min-w-[60px] ${
+              page === 'overview' ? 'text-[var(--text-primary)]' : 'text-[var(--text-tertiary)]'
+            }`}
+          >
+            <GridIcon size={20} />
+            <span className="text-[10px] font-medium">Overview</span>
+          </motion.button>
+
+          {/* Transactions */}
+          <motion.button
+            whileTap={{ scale: 0.9 }}
+            onClick={() => setPage('transactions')}
+            className={`flex flex-col items-center gap-1 px-3 py-2 rounded-xl transition-all min-w-[60px] ${
+              page === 'transactions' ? 'text-[var(--text-primary)]' : 'text-[var(--text-tertiary)]'
+            }`}
+          >
+            <ListIcon size={20} />
+            <span className="text-[10px] font-medium">Transactions</span>
+          </motion.button>
 
           {/* Center Add Button */}
           <motion.button
@@ -221,23 +244,29 @@ export default function App() {
             <PlusIcon size={22} />
           </motion.button>
 
-          {NAV_ITEMS.slice(2, 4).map(item => {
-            const Icon = item.icon;
-            const isActive = page === item.id;
-            return (
-              <motion.button
-                key={item.id}
-                whileTap={{ scale: 0.9 }}
-                onClick={() => setPage(item.id)}
-                className={`flex flex-col items-center gap-1 px-3 py-2 rounded-xl transition-all min-w-[60px] ${
-                  isActive ? 'text-[var(--text-primary)]' : 'text-[var(--text-tertiary)]'
-                }`}
-              >
-                <Icon size={20} />
-                <span className="text-[10px] font-medium">{item.label}</span>
-              </motion.button>
-            );
-          })}
+          {/* Memory */}
+          <motion.button
+            whileTap={{ scale: 0.9 }}
+            onClick={() => setPage('memory')}
+            className={`flex flex-col items-center gap-1 px-3 py-2 rounded-xl transition-all min-w-[60px] ${
+              page === 'memory' ? 'text-[var(--text-primary)]' : 'text-[var(--text-tertiary)]'
+            }`}
+          >
+            <HeartIcon size={20} />
+            <span className="text-[10px] font-medium">Memory</span>
+          </motion.button>
+
+          {/* Analytics */}
+          <motion.button
+            whileTap={{ scale: 0.9 }}
+            onClick={() => setPage('analytics')}
+            className={`flex flex-col items-center gap-1 px-3 py-2 rounded-xl transition-all min-w-[60px] ${
+              page === 'analytics' ? 'text-[var(--text-primary)]' : 'text-[var(--text-tertiary)]'
+            }`}
+          >
+            <ChartIcon size={20} />
+            <span className="text-[10px] font-medium">Analytics</span>
+          </motion.button>
         </div>
       </nav>
 

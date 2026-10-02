@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Expense, DEFAULT_CATEGORIES, Currency } from '../lib/types';
+import { Expense, DEFAULT_CATEGORIES, Currency, WorthItRating } from '../lib/types';
 import { generateId } from '../lib/utils';
 import { CloseIcon, CheckIcon, PlusIcon, FoodIcon, TransportIcon, ShoppingIcon, BillsIcon, EntertainmentIcon, HealthIcon, EducationIcon, OtherIcon } from './Icons';
 import { haptic } from '../lib/haptic';
@@ -31,6 +31,13 @@ export function AddExpenseModal({ isOpen, onClose, onSave, onUpdate, editExpense
   const [note, setNote] = useState('');
   const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
   const [saved, setSaved] = useState(false);
+  const [showMemory, setShowMemory] = useState(false);
+  const [memoryNote, setMemoryNote] = useState('');
+  const [worthItRating, setWorthItRating] = useState<WorthItRating | ''>('');
+  const [futureMeNote, setFutureMeNote] = useState('');
+  const [futureMeReminderDate, setFutureMeReminderDate] = useState('');
+  const [merchant, setMerchant] = useState('');
+  const [productName, setProductName] = useState('');
   const amountRef = useRef<HTMLInputElement>(null);
 
   const symbol = currency === 'BDT' ? '৳' : currency === 'USD' ? '$' : currency === 'EUR' ? '€' : currency === 'GBP' ? '£' : '₹';
@@ -42,11 +49,25 @@ export function AddExpenseModal({ isOpen, onClose, onSave, onUpdate, editExpense
         setCategory(editExpense.category);
         setNote(editExpense.note);
         setDate(editExpense.date);
+        setMemoryNote(editExpense.memoryNote || '');
+        setWorthItRating(editExpense.worthItRating || '');
+        setFutureMeNote(editExpense.futureMeNote || '');
+        setFutureMeReminderDate(editExpense.futureMeReminderDate || '');
+        setMerchant(editExpense.merchant || '');
+        setProductName(editExpense.productName || '');
+        setShowMemory(!!(editExpense.memoryNote || editExpense.worthItRating || editExpense.futureMeNote));
       } else {
         setAmount('');
         setCategory('food');
         setNote('');
         setDate(new Date().toISOString().split('T')[0]);
+        setMemoryNote('');
+        setWorthItRating('');
+        setFutureMeNote('');
+        setFutureMeReminderDate('');
+        setMerchant('');
+        setProductName('');
+        setShowMemory(false);
       }
       setSaved(false);
       setTimeout(() => amountRef.current?.focus(), 150);
@@ -80,6 +101,12 @@ export function AddExpenseModal({ isOpen, onClose, onSave, onUpdate, editExpense
       date,
       createdAt: editExpense?.createdAt || new Date().toISOString(),
       updatedAt: new Date().toISOString(),
+      memoryNote: memoryNote || undefined,
+      worthItRating: worthItRating || undefined,
+      futureMeNote: futureMeNote || undefined,
+      futureMeReminderDate: futureMeReminderDate || undefined,
+      merchant: merchant || undefined,
+      productName: productName || undefined,
     };
 
     setSaved(true);
@@ -215,6 +242,121 @@ export function AddExpenseModal({ isOpen, onClose, onSave, onUpdate, editExpense
                   onChange={e => setDate(e.target.value)}
                   className="w-full px-4 py-3 bg-transparent border-b border-[var(--border)] focus:outline-none focus:border-[var(--accent)] transition-all text-sm text-[var(--text-primary)]"
                 />
+              </div>
+
+              {/* Memory Section Toggle */}
+              <div>
+                <motion.button
+                  whileTap={{ scale: 0.98 }}
+                  onClick={() => setShowMemory(!showMemory)}
+                  className="w-full flex items-center justify-between p-3 border border-[var(--border)] rounded-xl hover:border-[var(--border-strong)] transition-all"
+                >
+                  <div className="flex items-center gap-2">
+                    <div className="w-1.5 h-1.5 rounded-full bg-[var(--accent)]" />
+                    <span className="text-sm font-medium text-[var(--text-secondary)]">Add memory (optional)</span>
+                  </div>
+                  <motion.div
+                    animate={{ rotate: showMemory ? 180 : 0 }}
+                    transition={{ duration: 0.2 }}
+                    className="text-[var(--text-tertiary)]"
+                  >
+                    ▼
+                  </motion.div>
+                </motion.button>
+
+                <AnimatePresence>
+                  {showMemory && (
+                    <motion.div
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: 'auto' }}
+                      exit={{ opacity: 0, height: 0 }}
+                      transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+                      className="overflow-hidden"
+                    >
+                      <div className="space-y-4 pt-4">
+                        {/* What was this for? */}
+                        <div>
+                          <label className="technical-text text-[var(--text-tertiary)] block mb-2">What was this for?</label>
+                          <input
+                            type="text"
+                            value={memoryNote}
+                            onChange={e => setMemoryNote(e.target.value)}
+                            placeholder="Dinner with friends, new phone case, etc."
+                            className="w-full px-4 py-3 bg-transparent border-b border-[var(--border)] focus:outline-none focus:border-[var(--accent)] transition-all text-sm text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)]"
+                          />
+                        </div>
+
+                        {/* Worth it? */}
+                        <div>
+                          <label className="technical-text text-[var(--text-tertiary)] block mb-2">Was it worth it?</label>
+                          <div className="grid grid-cols-2 gap-2">
+                            {(['absolutely', 'mostly', 'not-really', 'no'] as const).map(rating => (
+                              <motion.button
+                                key={rating}
+                                whileTap={{ scale: 0.95 }}
+                                onClick={() => setWorthItRating(worthItRating === rating ? '' : rating)}
+                                className={`px-3 py-2 text-xs rounded-full border transition-all capitalize ${
+                                  worthItRating === rating
+                                    ? 'border-[var(--text-primary)] bg-[var(--bg-secondary)] text-[var(--text-primary)]'
+                                    : 'border-[var(--border)] text-[var(--text-secondary)]'
+                                }`}
+                              >
+                                {rating === 'not-really' ? 'Not really' : rating}
+                              </motion.button>
+                            ))}
+                          </div>
+                        </div>
+
+                        {/* Future me */}
+                        <div>
+                          <label className="technical-text text-[var(--text-tertiary)] block mb-2">Future me</label>
+                          <textarea
+                            value={futureMeNote}
+                            onChange={e => setFutureMeNote(e.target.value)}
+                            placeholder="Anything you want to remember?"
+                            rows={2}
+                            className="w-full px-4 py-3 bg-transparent border border-[var(--border)] rounded-xl focus:outline-none focus:border-[var(--accent)] transition-all text-sm text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)] resize-none"
+                          />
+                        </div>
+
+                        {/* Reminder date */}
+                        <div>
+                          <label className="technical-text text-[var(--text-tertiary)] block mb-2">Remind me (optional)</label>
+                          <input
+                            type="date"
+                            value={futureMeReminderDate}
+                            onChange={e => setFutureMeReminderDate(e.target.value)}
+                            className="w-full px-4 py-3 bg-transparent border-b border-[var(--border)] focus:outline-none focus:border-[var(--accent)] transition-all text-sm text-[var(--text-primary)]"
+                          />
+                        </div>
+
+                        {/* Merchant */}
+                        <div>
+                          <label className="technical-text text-[var(--text-tertiary)] block mb-2">Merchant/Store (optional)</label>
+                          <input
+                            type="text"
+                            value={merchant}
+                            onChange={e => setMerchant(e.target.value)}
+                            placeholder="Daraz, Chaldal, local shop, etc."
+                            className="w-full px-4 py-3 bg-transparent border-b border-[var(--border)] focus:outline-none focus:border-[var(--accent)] transition-all text-sm text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)]"
+                          />
+                        </div>
+
+                        {/* Product name */}
+                        <div>
+                          <label className="technical-text text-[var(--text-tertiary)] block mb-2">Product name (optional)</label>
+                          <input
+                            type="text"
+                            value={productName}
+                            onChange={e => setProductName(e.target.value)}
+                            placeholder="Sony WH-1000XM4, iPhone 15, etc."
+                            className="w-full px-4 py-3 bg-transparent border-b border-[var(--border)] focus:outline-none focus:border-[var(--accent)] transition-all text-sm text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)]"
+                          />
+                        </div>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </div>
 
               {/* Save Button */}
