@@ -1,9 +1,8 @@
 import { useState, useMemo, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Search, SlidersHorizontal, X, Trash2, Edit3 } from 'lucide-react';
 import { Expense, Currency, DEFAULT_CATEGORIES } from '../lib/types';
 import { formatCurrency, formatSmartDate, formatTime, groupExpensesByDate } from '../lib/utils';
-import { parseISO } from 'date-fns';
+import { SearchIcon, FilterIcon, CloseIcon, EditIcon, TrashIcon, FoodIcon, TransportIcon, ShoppingIcon, BillsIcon, EntertainmentIcon, HealthIcon, EducationIcon, OtherIcon } from './Icons';
 
 interface TransactionsProps {
   expenses: Expense[];
@@ -11,6 +10,17 @@ interface TransactionsProps {
   onEdit: (expense: Expense) => void;
   onDelete: (id: string) => void;
 }
+
+const categoryIcons: Record<string, any> = {
+  food: FoodIcon,
+  transport: TransportIcon,
+  shopping: ShoppingIcon,
+  bills: BillsIcon,
+  entertainment: EntertainmentIcon,
+  health: HealthIcon,
+  education: EducationIcon,
+  other: OtherIcon,
+};
 
 export function Transactions({ expenses, currency, onEdit, onDelete }: TransactionsProps) {
   const [search, setSearch] = useState('');
@@ -20,7 +30,6 @@ export function Transactions({ expenses, currency, onEdit, onDelete }: Transacti
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
   const searchRef = useRef<HTMLInputElement>(null);
 
-  // Keyboard shortcut for search
   useEffect(() => {
     const handleKey = (e: KeyboardEvent) => {
       if (e.key === '/' && !(e.target instanceof HTMLInputElement) && !(e.target instanceof HTMLTextAreaElement)) {
@@ -80,7 +89,7 @@ export function Transactions({ expenses, currency, onEdit, onDelete }: Transacti
   if (expenses.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[40vh] px-6 text-center animate-fade-in">
-        <p className="text-[var(--text-secondary)]">No transactions yet.</p>
+        <p className="text-sm text-[var(--text-secondary)]">No transactions yet.</p>
       </div>
     );
   }
@@ -88,30 +97,30 @@ export function Transactions({ expenses, currency, onEdit, onDelete }: Transacti
   return (
     <div className="animate-fade-in">
       {/* Search & Filter Bar */}
-      <div className="flex items-center gap-2 mb-4">
+      <div className="flex items-center gap-2 mb-6">
         <div className="flex-1 relative">
-          <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-tertiary)]" />
+          <SearchIcon size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--text-tertiary)]" />
           <input
             ref={searchRef}
             type="text"
             value={search}
             onChange={e => setSearch(e.target.value)}
-            placeholder="Search expenses… (press /)"
-            className="w-full pl-9 pr-4 py-2.5 text-sm bg-[var(--bg-secondary)] border border-[var(--border)] rounded-xl focus:outline-none focus:border-[var(--accent)] transition-all text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)]"
+            placeholder="Search (press /)"
+            className="w-full pl-11 pr-4 py-3 text-sm bg-transparent border border-[var(--border)] rounded-full focus:outline-none focus:border-[var(--text-primary)] transition-all text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)]"
           />
           {search && (
-            <button onClick={() => setSearch('')} className="absolute right-3 top-1/2 -translate-y-1/2">
-              <X size={14} className="text-[var(--text-tertiary)]" />
+            <button onClick={() => setSearch('')} className="absolute right-4 top-1/2 -translate-y-1/2">
+              <CloseIcon size={14} className="text-[var(--text-tertiary)]" />
             </button>
           )}
         </div>
         <button
           onClick={() => setShowFilters(!showFilters)}
-          className={`p-2.5 rounded-xl border transition-all ${
-            showFilters ? 'border-[var(--accent)] bg-[var(--bg-secondary)]' : 'border-[var(--border)] hover:border-[var(--text-tertiary)]'
+          className={`p-3 rounded-full border transition-all ${
+            showFilters ? 'border-[var(--text-primary)] bg-[var(--bg-secondary)]' : 'border-[var(--border)] hover:border-[var(--border-strong)]'
           }`}
         >
-          <SlidersHorizontal size={16} className="text-[var(--text-secondary)]" />
+          <FilterIcon size={16} className="text-[var(--text-secondary)]" />
         </button>
       </div>
 
@@ -122,18 +131,18 @@ export function Transactions({ expenses, currency, onEdit, onDelete }: Transacti
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
-            transition={{ duration: 0.2 }}
-            className="overflow-hidden mb-4"
+            transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+            className="overflow-hidden mb-6"
           >
-            <div className="space-y-3 pb-3">
+            <div className="space-y-4 pb-4">
               {/* Category filter */}
               <div>
-                <label className="text-xs font-medium text-[var(--text-tertiary)] mb-1.5 block">Category</label>
-                <div className="flex flex-wrap gap-1.5">
+                <label className="technical-text text-[var(--text-tertiary)] mb-2 block">Category</label>
+                <div className="flex flex-wrap gap-2">
                   <button
                     onClick={() => setFilterCategory('all')}
-                    className={`px-3 py-1.5 text-xs rounded-lg border transition-all ${
-                      filterCategory === 'all' ? 'border-[var(--accent)] bg-[var(--bg-secondary)] text-[var(--text-primary)]' : 'border-[var(--border)] text-[var(--text-secondary)]'
+                    className={`px-4 py-2 text-xs rounded-full border transition-all ${
+                      filterCategory === 'all' ? 'border-[var(--text-primary)] bg-[var(--bg-secondary)] text-[var(--text-primary)]' : 'border-[var(--border)] text-[var(--text-secondary)]'
                     }`}
                   >
                     All
@@ -142,8 +151,8 @@ export function Transactions({ expenses, currency, onEdit, onDelete }: Transacti
                     <button
                       key={cat.id}
                       onClick={() => setFilterCategory(cat.id)}
-                      className={`px-3 py-1.5 text-xs rounded-lg border transition-all ${
-                        filterCategory === cat.id ? 'border-[var(--accent)] bg-[var(--bg-secondary)] text-[var(--text-primary)]' : 'border-[var(--border)] text-[var(--text-secondary)]'
+                      className={`px-4 py-2 text-xs rounded-full border transition-all ${
+                        filterCategory === cat.id ? 'border-[var(--text-primary)] bg-[var(--bg-secondary)] text-[var(--text-primary)]' : 'border-[var(--border)] text-[var(--text-secondary)]'
                       }`}
                     >
                       {cat.name}
@@ -153,14 +162,14 @@ export function Transactions({ expenses, currency, onEdit, onDelete }: Transacti
               </div>
               {/* Sort */}
               <div>
-                <label className="text-xs font-medium text-[var(--text-tertiary)] mb-1.5 block">Sort by</label>
-                <div className="flex flex-wrap gap-1.5">
+                <label className="technical-text text-[var(--text-tertiary)] mb-2 block">Sort by</label>
+                <div className="flex flex-wrap gap-2">
                   {(['newest', 'oldest', 'highest', 'lowest'] as const).map(s => (
                     <button
                       key={s}
                       onClick={() => setSortBy(s)}
-                      className={`px-3 py-1.5 text-xs rounded-lg border transition-all capitalize ${
-                        sortBy === s ? 'border-[var(--accent)] bg-[var(--bg-secondary)] text-[var(--text-primary)]' : 'border-[var(--border)] text-[var(--text-secondary)]'
+                      className={`px-4 py-2 text-xs rounded-full border transition-all ${
+                        sortBy === s ? 'border-[var(--text-primary)] bg-[var(--bg-secondary)] text-[var(--text-primary)]' : 'border-[var(--border)] text-[var(--text-secondary)]'
                       }`}
                     >
                       {s === 'highest' ? 'Amount ↓' : s === 'lowest' ? 'Amount ↑' : s === 'newest' ? 'Newest' : 'Oldest'}
@@ -179,64 +188,60 @@ export function Transactions({ expenses, currency, onEdit, onDelete }: Transacti
           <p className="text-sm text-[var(--text-tertiary)]">No matching expenses.</p>
         </div>
       ) : (
-        <div className="space-y-5">
+        <div className="space-y-8">
           {grouped.map(([dateKey, items]) => (
             <div key={dateKey}>
-              <h3 className="text-xs font-medium text-[var(--text-tertiary)] uppercase tracking-wider mb-2 px-1">
-                {formatSmartDate(dateKey)}
-              </h3>
-              <div className="space-y-0.5">
+              <div className="flex items-center gap-2 mb-4">
+                <div className="w-1 h-1 rounded-full bg-[var(--text-primary)]" />
+                <h3 className="technical-text text-[var(--text-secondary)]">
+                  {formatSmartDate(dateKey)}
+                </h3>
+              </div>
+              <div className="space-y-1">
                 {items.map((expense, i) => {
-                  const cat = DEFAULT_CATEGORIES.find(c => c.id === expense.category);
+                  const Icon = categoryIcons[expense.category] || OtherIcon;
                   const isConfirming = confirmDelete === expense.id;
                   return (
                     <motion.div
                       key={expense.id}
-                      initial={{ opacity: 0, y: 6 }}
-                      animate={{ opacity: 1, y: 0 }}
+                      initial={{ opacity: 0, x: -8 }}
+                      animate={{ opacity: 1, x: 0 }}
                       exit={{ opacity: 0, height: 0 }}
-                      transition={{ delay: i * 0.02, duration: 0.15 }}
+                      transition={{ delay: i * 0.03, duration: 0.2 }}
                       onClick={() => onEdit(expense)}
-                      className={`flex items-center gap-3 px-3 py-3 rounded-xl transition-all group cursor-pointer sm:cursor-default ${
+                      className={`flex items-center gap-4 p-3 rounded-xl transition-all cursor-pointer sm:cursor-default group ${
                         isConfirming ? 'bg-red-50 dark:bg-red-950/20' : 'hover:bg-[var(--bg-secondary)] active:bg-[var(--bg-tertiary)]'
                       }`}
                     >
-                      <div className="w-9 h-9 rounded-xl bg-[var(--bg-secondary)] flex items-center justify-center text-base shrink-0">
-                        {expense.category === 'food' && '🍔'}
-                        {expense.category === 'transport' && '🚕'}
-                        {expense.category === 'shopping' && '🛍️'}
-                        {expense.category === 'bills' && '📄'}
-                        {expense.category === 'entertainment' && '🎮'}
-                        {expense.category === 'health' && '💊'}
-                        {expense.category === 'education' && '📚'}
-                        {expense.category === 'other' && '•••'}
+                      <div className="w-10 h-10 border border-[var(--border)] rounded-xl flex items-center justify-center group-hover:border-[var(--border-strong)] transition-colors shrink-0">
+                        <Icon size={18} className="text-[var(--text-secondary)]" />
                       </div>
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-medium text-[var(--text-primary)] truncate">
-                          {expense.note || cat?.name}
+                          {expense.note || DEFAULT_CATEGORIES.find(c => c.id === expense.category)?.name}
                         </p>
-                        <p className="text-xs text-[var(--text-tertiary)]">
-                          {cat?.name} · {formatTime(expense.createdAt)}
+                        <p className="text-xs text-[var(--text-tertiary)] mt-0.5">
+                          {DEFAULT_CATEGORIES.find(c => c.id === expense.category)?.name} · {formatTime(expense.createdAt)}
                         </p>
                       </div>
-                      <div className="flex items-center gap-2">
-                        <span className="text-sm font-semibold text-[var(--text-primary)] tabular-nums">
+                      <div className="flex items-center gap-3">
+                        <span className="text-sm font-medium text-[var(--text-primary)] large-number">
                           −{formatCurrency(expense.amount, currency)}
                         </span>
-                        <div className="flex items-center gap-0.5 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
+                        <div className="flex items-center gap-1 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
                           <button
                             onClick={(e) => { e.stopPropagation(); onEdit(expense); }}
-                            className="p-1.5 rounded-lg hover:bg-[var(--bg-tertiary)] transition-colors"
+                            className="p-1.5 rounded-full hover:bg-[var(--bg-tertiary)] transition-colors"
                             aria-label="Edit"
                           >
-                            <Edit3 size={13} className="text-[var(--text-tertiary)]" />
+                            <EditIcon size={14} className="text-[var(--text-tertiary)]" />
                           </button>
                           <button
                             onClick={(e) => { e.stopPropagation(); handleDelete(expense.id); }}
-                            className="p-1.5 rounded-lg hover:bg-red-100 dark:hover:bg-red-950/30 transition-colors"
+                            className="p-1.5 rounded-full hover:bg-red-100 dark:hover:bg-red-950/30 transition-colors"
                             aria-label={isConfirming ? 'Confirm delete' : 'Delete'}
                           >
-                            <Trash2 size={13} className={isConfirming ? 'text-red-500' : 'text-[var(--text-tertiary)]'} />
+                            <TrashIcon size={14} className={isConfirming ? 'text-red-500' : 'text-[var(--text-tertiary)]'} />
                           </button>
                         </div>
                       </div>
@@ -251,8 +256,8 @@ export function Transactions({ expenses, currency, onEdit, onDelete }: Transacti
 
       {/* Mobile delete confirmation */}
       {confirmDelete && (
-        <div className="sm:hidden fixed bottom-20 left-4 right-4 animate-slide-up">
-          <div className="bg-[var(--card)] border border-[var(--border)] rounded-xl px-4 py-3 shadow-lg flex items-center justify-between">
+        <div className="sm:hidden fixed bottom-24 left-4 right-4 animate-slide-up">
+          <div className="bg-[var(--bg)] border border-[var(--border-strong)] rounded-2xl px-5 py-4 shadow-xl flex items-center justify-between">
             <p className="text-sm text-[var(--text-secondary)]">Tap again to delete</p>
             <button
               onClick={() => setConfirmDelete(null)}

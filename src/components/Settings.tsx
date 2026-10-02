@@ -1,7 +1,7 @@
 import { useState, useRef } from 'react';
 import { motion } from 'framer-motion';
-import { Sun, Moon, Monitor, Download, Upload, Trash2, Shield } from 'lucide-react';
 import { Settings as SettingsType, Theme, Currency, CURRENCY_SYMBOLS } from '../lib/types';
+import { DownloadIcon, UploadIcon, TrashIcon, ShieldIcon } from './Icons';
 import { exportData, importData, deleteAllExpenses } from '../lib/db';
 
 interface SettingsProps {
@@ -47,10 +47,10 @@ export function Settings({ settings, onUpdateSettings, onDeleteAll }: SettingsPr
     setShowDeleteConfirm(false);
   };
 
-  const themes: { value: Theme; label: string; icon: typeof Sun }[] = [
-    { value: 'light', label: 'Light', icon: Sun },
-    { value: 'dark', label: 'Dark', icon: Moon },
-    { value: 'system', label: 'System', icon: Monitor },
+  const themes: { value: Theme; label: string }[] = [
+    { value: 'light', label: 'Light' },
+    { value: 'dark', label: 'Dark' },
+    { value: 'system', label: 'System' },
   ];
 
   const currencies: { value: Currency; label: string }[] = [
@@ -62,82 +62,101 @@ export function Settings({ settings, onUpdateSettings, onDeleteAll }: SettingsPr
   ];
 
   return (
-    <div className="animate-fade-in space-y-8 max-w-lg">
+    <div className="animate-fade-in space-y-10 max-w-lg">
       {/* Appearance */}
       <div>
-        <h3 className="text-sm font-medium text-[var(--text-secondary)] mb-3">Appearance</h3>
+        <div className="flex items-center gap-2 mb-5">
+          <div className="w-1 h-1 rounded-full bg-[var(--text-primary)]" />
+          <h3 className="technical-text text-[var(--text-secondary)]">Appearance</h3>
+        </div>
         <div className="grid grid-cols-3 gap-2">
-          {themes.map(t => {
-            const Icon = t.icon;
-            return (
-              <button
-                key={t.value}
-                onClick={() => onUpdateSettings({ theme: t.value })}
-                className={`flex flex-col items-center gap-2 py-4 rounded-xl border transition-all ${
-                  settings.theme === t.value
-                    ? 'border-[var(--accent)] bg-[var(--bg-secondary)]'
-                    : 'border-[var(--border)] hover:border-[var(--text-tertiary)]'
-                }`}
-              >
-                <Icon size={18} className="text-[var(--text-secondary)]" />
-                <span className="text-xs font-medium text-[var(--text-primary)]">{t.label}</span>
-              </button>
-            );
-          })}
+          {themes.map(t => (
+            <motion.button
+              key={t.value}
+              whileTap={{ scale: 0.97 }}
+              onClick={() => onUpdateSettings({ theme: t.value })}
+              className={`flex flex-col items-center gap-3 py-5 rounded-xl border transition-all ${
+                settings.theme === t.value
+                  ? 'border-[var(--text-primary)] bg-[var(--bg-secondary)]'
+                  : 'border-[var(--border)] hover:border-[var(--border-strong)]'
+              }`}
+            >
+              <div className={`w-8 h-8 rounded-full border-2 ${
+                settings.theme === t.value ? 'border-[var(--text-primary)]' : 'border-[var(--border)]'
+              }`}>
+                {settings.theme === t.value && (
+                  <div className="w-full h-full rounded-full bg-[var(--text-primary)]" />
+                )}
+              </div>
+              <span className={`text-xs font-medium ${
+                settings.theme === t.value ? 'text-[var(--text-primary)]' : 'text-[var(--text-secondary)]'
+              }`}>{t.label}</span>
+            </motion.button>
+          ))}
         </div>
       </div>
 
       {/* Currency */}
       <div>
-        <h3 className="text-sm font-medium text-[var(--text-secondary)] mb-3">Currency</h3>
+        <div className="flex items-center gap-2 mb-5">
+          <div className="w-1 h-1 rounded-full bg-[var(--text-primary)]" />
+          <h3 className="technical-text text-[var(--text-secondary)]">Currency</h3>
+        </div>
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
           {currencies.map(c => (
-            <button
+            <motion.button
               key={c.value}
+              whileTap={{ scale: 0.97 }}
               onClick={() => onUpdateSettings({ currency: c.value })}
-              className={`px-4 py-3 rounded-xl border text-sm font-medium transition-all ${
+              className={`px-4 py-4 rounded-xl border text-sm font-medium transition-all ${
                 settings.currency === c.value
-                  ? 'border-[var(--accent)] bg-[var(--bg-secondary)] text-[var(--text-primary)]'
-                  : 'border-[var(--border)] text-[var(--text-secondary)] hover:border-[var(--text-tertiary)]'
+                  ? 'border-[var(--text-primary)] bg-[var(--bg-secondary)] text-[var(--text-primary)]'
+                  : 'border-[var(--border)] text-[var(--text-secondary)] hover:border-[var(--border-strong)]'
               }`}
             >
               {c.label}
-            </button>
+            </motion.button>
           ))}
         </div>
       </div>
 
       {/* Data */}
       <div>
-        <h3 className="text-sm font-medium text-[var(--text-secondary)] mb-3">Data</h3>
+        <div className="flex items-center gap-2 mb-5">
+          <div className="w-1 h-1 rounded-full bg-[var(--text-primary)]" />
+          <h3 className="technical-text text-[var(--text-secondary)]">Data</h3>
+        </div>
         <div className="space-y-2">
-          <button
+          <motion.button
+            whileTap={{ scale: 0.98 }}
             onClick={handleExport}
-            className="w-full flex items-center gap-3 px-4 py-3.5 rounded-xl border border-[var(--border)] hover:border-[var(--text-tertiary)] transition-all text-left"
+            className="w-full flex items-center gap-4 px-5 py-4 rounded-xl border border-[var(--border)] hover:border-[var(--border-strong)] transition-all text-left group"
           >
-            <Download size={16} className="text-[var(--text-secondary)]" />
-            <span className="text-sm font-medium text-[var(--text-primary)]">Export data</span>
-            <span className="text-xs text-[var(--text-tertiary)] ml-auto">JSON</span>
-          </button>
+            <DownloadIcon size={18} className="text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] transition-colors" />
+            <span className="text-sm font-medium text-[var(--text-primary)] flex-1">Export data</span>
+            <span className="technical-text text-[var(--text-tertiary)]">JSON</span>
+          </motion.button>
           
-          <button
+          <motion.button
+            whileTap={{ scale: 0.98 }}
             onClick={() => fileRef.current?.click()}
-            className="w-full flex items-center gap-3 px-4 py-3.5 rounded-xl border border-[var(--border)] hover:border-[var(--text-tertiary)] transition-all text-left"
+            className="w-full flex items-center gap-4 px-5 py-4 rounded-xl border border-[var(--border)] hover:border-[var(--border-strong)] transition-all text-left group"
           >
-            <Upload size={16} className="text-[var(--text-secondary)]" />
-            <span className="text-sm font-medium text-[var(--text-primary)]">Import data</span>
-            {importStatus === 'success' && <span className="text-xs text-green-600 ml-auto">Success!</span>}
-            {importStatus === 'error' && <span className="text-xs text-red-500 ml-auto">Error</span>}
-          </button>
+            <UploadIcon size={18} className="text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] transition-colors" />
+            <span className="text-sm font-medium text-[var(--text-primary)] flex-1">Import data</span>
+            {importStatus === 'success' && <span className="technical-text text-green-600">Success</span>}
+            {importStatus === 'error' && <span className="technical-text text-red-500">Error</span>}
+          </motion.button>
           <input ref={fileRef} type="file" accept=".json" onChange={handleImport} className="hidden" />
 
-          <button
+          <motion.button
+            whileTap={{ scale: 0.98 }}
             onClick={() => setShowDeleteConfirm(true)}
-            className="w-full flex items-center gap-3 px-4 py-3.5 rounded-xl border border-red-200 dark:border-red-900/50 hover:bg-red-50 dark:hover:bg-red-950/20 transition-all text-left"
+            className="w-full flex items-center gap-4 px-5 py-4 rounded-xl border border-red-200 dark:border-red-900/50 hover:bg-red-50 dark:hover:bg-red-950/20 transition-all text-left group"
           >
-            <Trash2 size={16} className="text-red-500" />
+            <TrashIcon size={18} className="text-red-500" />
             <span className="text-sm font-medium text-red-600 dark:text-red-400">Delete all data</span>
-          </button>
+          </motion.button>
         </div>
       </div>
 
@@ -146,21 +165,22 @@ export function Settings({ settings, onUpdateSettings, onDeleteAll }: SettingsPr
         <motion.div
           initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
-          className="p-4 bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-900/50 rounded-xl"
+          className="p-5 bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-900/50 rounded-2xl"
         >
-          <p className="text-sm text-red-700 dark:text-red-300 mb-3">
+          <p className="text-sm text-red-700 dark:text-red-300 mb-4">
             This will permanently delete all your expenses. This cannot be undone.
           </p>
           <div className="flex gap-2">
-            <button
+            <motion.button
+              whileTap={{ scale: 0.97 }}
               onClick={handleDeleteAll}
-              className="px-4 py-2 bg-red-600 text-white text-sm font-medium rounded-lg hover:bg-red-700 transition-colors"
+              className="px-5 py-2.5 bg-red-600 text-white text-sm font-medium rounded-full hover:bg-red-700 transition-colors"
             >
               Delete everything
-            </button>
+            </motion.button>
             <button
               onClick={() => setShowDeleteConfirm(false)}
-              className="px-4 py-2 text-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors"
+              className="px-5 py-2.5 text-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors"
             >
               Cancel
             </button>
@@ -169,9 +189,9 @@ export function Settings({ settings, onUpdateSettings, onDeleteAll }: SettingsPr
       )}
 
       {/* Privacy */}
-      <div className="flex items-center gap-3 px-4 py-3 bg-[var(--bg-secondary)] rounded-xl">
-        <Shield size={16} className="text-[var(--text-tertiary)] shrink-0" />
-        <p className="text-xs text-[var(--text-tertiary)]">
+      <div className="flex items-center gap-3 px-5 py-4 border border-[var(--border)] rounded-xl">
+        <ShieldIcon size={16} className="text-[var(--text-tertiary)] shrink-0" />
+        <p className="text-xs text-[var(--text-tertiary)] leading-relaxed">
           Your data stays on this device. No accounts, no servers, no tracking.
         </p>
       </div>

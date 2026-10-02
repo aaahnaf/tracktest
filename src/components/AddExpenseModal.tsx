@@ -1,9 +1,9 @@
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Check } from 'lucide-react';
 import { Expense, DEFAULT_CATEGORIES, Currency } from '../lib/types';
 import { generateId } from '../lib/utils';
-import { formatCurrency } from '../lib/utils';
+import { CloseIcon, CheckIcon, PlusIcon } from './Icons';
+import { FoodIcon, TransportIcon, ShoppingIcon, BillsIcon, EntertainmentIcon, HealthIcon, EducationIcon, OtherIcon } from './Icons';
 import { haptic } from '../lib/haptic';
 
 interface AddExpenseModalProps {
@@ -15,6 +15,17 @@ interface AddExpenseModalProps {
   currency: Currency;
 }
 
+const categoryIcons: Record<string, any> = {
+  food: FoodIcon,
+  transport: TransportIcon,
+  shopping: ShoppingIcon,
+  bills: BillsIcon,
+  entertainment: EntertainmentIcon,
+  health: HealthIcon,
+  education: EducationIcon,
+  other: OtherIcon,
+};
+
 export function AddExpenseModal({ isOpen, onClose, onSave, onUpdate, editExpense, currency }: AddExpenseModalProps) {
   const [amount, setAmount] = useState('');
   const [category, setCategory] = useState('food');
@@ -22,6 +33,8 @@ export function AddExpenseModal({ isOpen, onClose, onSave, onUpdate, editExpense
   const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
   const [saved, setSaved] = useState(false);
   const amountRef = useRef<HTMLInputElement>(null);
+
+  const symbol = currency === 'BDT' ? '৳' : currency === 'USD' ? '$' : currency === 'EUR' ? '€' : currency === 'GBP' ? '£' : '₹';
 
   useEffect(() => {
     if (isOpen) {
@@ -37,7 +50,7 @@ export function AddExpenseModal({ isOpen, onClose, onSave, onUpdate, editExpense
         setDate(new Date().toISOString().split('T')[0]);
       }
       setSaved(false);
-      setTimeout(() => amountRef.current?.focus(), 100);
+      setTimeout(() => amountRef.current?.focus(), 150);
     }
   }, [isOpen, editExpense]);
 
@@ -79,7 +92,7 @@ export function AddExpenseModal({ isOpen, onClose, onSave, onUpdate, editExpense
         onSave(expense);
       }
       onClose();
-    }, 300);
+    }, 400);
   };
 
   const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -96,7 +109,7 @@ export function AddExpenseModal({ isOpen, onClose, onSave, onUpdate, editExpense
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          transition={{ duration: 0.15 }}
+          transition={{ duration: 0.2 }}
           className="fixed inset-0 z-50 flex items-end sm:items-center justify-center"
         >
           {/* Backdrop */}
@@ -105,38 +118,41 @@ export function AddExpenseModal({ isOpen, onClose, onSave, onUpdate, editExpense
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={onClose}
-            className="absolute inset-0 bg-black/40 backdrop-blur-sm"
+            className="absolute inset-0 bg-black/60 backdrop-blur-md"
           />
           
           {/* Modal */}
           <motion.div
-            initial={{ opacity: 0, y: 40, scale: 0.97 }}
+            initial={{ opacity: 0, y: 50, scale: 0.96 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 20, scale: 0.98 }}
-            transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
-            className="relative w-full sm:max-w-md bg-[var(--card)] sm:rounded-2xl rounded-t-2xl border border-[var(--border)] shadow-xl max-h-[90vh] overflow-y-auto"
+            exit={{ opacity: 0, y: 30, scale: 0.97 }}
+            transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
+            className="relative w-full sm:max-w-md bg-[var(--bg)] sm:rounded-3xl rounded-t-3xl border border-[var(--border-strong)] max-h-[92vh] overflow-y-auto"
           >
             {/* Header */}
-            <div className="flex items-center justify-between px-6 pt-5 pb-3">
-              <h2 className="text-lg font-semibold text-[var(--text-primary)]">
-                {editExpense ? 'Edit expense' : 'New expense'}
-              </h2>
+            <div className="flex items-center justify-between px-6 pt-6 pb-4 border-b border-[var(--border)]">
+              <div className="flex items-center gap-2">
+                <div className="w-1.5 h-1.5 rounded-full bg-[var(--text-primary)]" />
+                <h2 className="technical-text text-[var(--text-secondary)]">
+                  {editExpense ? 'Edit expense' : 'New expense'}
+                </h2>
+              </div>
               <button
                 onClick={onClose}
-                className="p-2 -mr-2 rounded-xl hover:bg-[var(--bg-secondary)] transition-colors"
+                className="p-2 -mr-2 rounded-full hover:bg-[var(--bg-secondary)] transition-colors"
                 aria-label="Close"
               >
-                <X size={18} className="text-[var(--text-secondary)]" />
+                <CloseIcon size={16} className="text-[var(--text-secondary)]" />
               </button>
             </div>
 
-            <div className="px-6 pb-6 space-y-5">
+            <div className="px-6 py-6 space-y-6">
               {/* Amount */}
               <div>
-                <label className="block text-sm font-medium text-[var(--text-secondary)] mb-2">Amount</label>
+                <label className="technical-text text-[var(--text-tertiary)] block mb-3">Amount</label>
                 <div className="relative">
-                  <span className="absolute left-4 top-1/2 -translate-y-1/2 text-2xl font-light text-[var(--text-tertiary)]">
-                    {currency === 'BDT' ? '৳' : currency === 'USD' ? '$' : currency === 'EUR' ? '€' : currency === 'GBP' ? '£' : '₹'}
+                  <span className="absolute left-0 top-1/2 -translate-y-1/2 text-3xl font-light text-[var(--text-tertiary)]">
+                    {symbol}
                   </span>
                   <input
                     ref={amountRef}
@@ -145,85 +161,87 @@ export function AddExpenseModal({ isOpen, onClose, onSave, onUpdate, editExpense
                     value={amount}
                     onChange={handleAmountChange}
                     placeholder="0"
-                    className="w-full pl-12 pr-4 py-4 text-3xl font-semibold bg-[var(--bg-secondary)] border border-[var(--border)] rounded-xl focus:outline-none focus:border-[var(--accent)] focus:ring-1 focus:ring-[var(--accent)] transition-all text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)]"
+                    className="w-full pl-10 pr-4 py-4 text-4xl font-light bg-transparent border-b-2 border-[var(--border-strong)] focus:outline-none focus:border-[var(--text-primary)] transition-all text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)] large-number"
                   />
                 </div>
               </div>
 
               {/* Category */}
               <div>
-                <label className="block text-sm font-medium text-[var(--text-secondary)] mb-2">Category</label>
+                <label className="technical-text text-[var(--text-tertiary)] block mb-3">Category</label>
                 <div className="grid grid-cols-4 gap-2">
-                  {DEFAULT_CATEGORIES.map(cat => (
-                    <button
-                      key={cat.id}
-                      onClick={() => setCategory(cat.id)}
-                      className={`flex flex-col items-center gap-1.5 py-3 px-2 rounded-xl border transition-all text-xs font-medium ${
-                        category === cat.id
-                          ? 'border-[var(--accent)] bg-[var(--bg-secondary)] text-[var(--text-primary)]'
-                          : 'border-[var(--border)] hover:border-[var(--text-tertiary)] text-[var(--text-secondary)]'
-                      }`}
-                    >
-                      <span className="text-lg">
-                        {cat.id === 'food' && '🍔'}
-                        {cat.id === 'transport' && '🚕'}
-                        {cat.id === 'shopping' && '🛍️'}
-                        {cat.id === 'bills' && '📄'}
-                        {cat.id === 'entertainment' && '🎮'}
-                        {cat.id === 'health' && '💊'}
-                        {cat.id === 'education' && '📚'}
-                        {cat.id === 'other' && '•••'}
-                      </span>
-                      <span>{cat.name}</span>
-                    </button>
-                  ))}
+                  {DEFAULT_CATEGORIES.map(cat => {
+                    const Icon = categoryIcons[cat.id] || OtherIcon;
+                    const isSelected = category === cat.id;
+                    return (
+                      <motion.button
+                        key={cat.id}
+                        whileTap={{ scale: 0.95 }}
+                        onClick={() => { setCategory(cat.id); haptic('light'); }}
+                        className={`flex flex-col items-center gap-2 py-3 px-2 rounded-xl border transition-all ${
+                          isSelected
+                            ? 'border-[var(--text-primary)] bg-[var(--bg-secondary)]'
+                            : 'border-[var(--border)] hover:border-[var(--border-strong)]'
+                        }`}
+                      >
+                        <Icon size={18} className={isSelected ? 'text-[var(--text-primary)]' : 'text-[var(--text-secondary)]'} />
+                        <span className={`text-[10px] font-medium ${isSelected ? 'text-[var(--text-primary)]' : 'text-[var(--text-tertiary)]'}`}>
+                          {cat.name}
+                        </span>
+                      </motion.button>
+                    );
+                  })}
                 </div>
               </div>
 
               {/* Note */}
               <div>
-                <label className="block text-sm font-medium text-[var(--text-secondary)] mb-2">Note</label>
+                <label className="technical-text text-[var(--text-tertiary)] block mb-3">Note</label>
                 <input
                   type="text"
                   value={note}
                   onChange={e => setNote(e.target.value)}
                   placeholder="Add a note…"
-                  className="w-full px-4 py-3 bg-[var(--bg-secondary)] border border-[var(--border)] rounded-xl focus:outline-none focus:border-[var(--accent)] focus:ring-1 focus:ring-[var(--accent)] transition-all text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)]"
+                  className="w-full px-4 py-3 bg-transparent border-b border-[var(--border)] focus:outline-none focus:border-[var(--text-primary)] transition-all text-sm text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)]"
                 />
               </div>
 
               {/* Date */}
               <div>
-                <label className="block text-sm font-medium text-[var(--text-secondary)] mb-2">Date</label>
+                <label className="technical-text text-[var(--text-tertiary)] block mb-3">Date</label>
                 <input
                   type="date"
                   value={date}
                   onChange={e => setDate(e.target.value)}
-                  className="w-full px-4 py-3 bg-[var(--bg-secondary)] border border-[var(--border)] rounded-xl focus:outline-none focus:border-[var(--accent)] focus:ring-1 focus:ring-[var(--accent)] transition-all text-[var(--text-primary)]"
+                  className="w-full px-4 py-3 bg-transparent border-b border-[var(--border)] focus:outline-none focus:border-[var(--text-primary)] transition-all text-sm text-[var(--text-primary)]"
                 />
               </div>
 
               {/* Save Button */}
-              <button
+              <motion.button
+                whileTap={{ scale: 0.97 }}
                 onClick={handleSave}
                 disabled={!amount || parseFloat(amount) <= 0}
-                className={`w-full py-4 rounded-xl font-semibold text-base transition-all flex items-center justify-center gap-2 ${
+                className={`w-full py-4 rounded-full font-medium text-sm transition-all flex items-center justify-center gap-2 ${
                   saved
                     ? 'bg-green-600 text-white'
                     : !amount || parseFloat(amount) <= 0
                     ? 'bg-[var(--bg-tertiary)] text-[var(--text-tertiary)] cursor-not-allowed'
-                    : 'bg-[var(--accent)] text-[var(--bg)] hover:opacity-90 active:scale-[0.98]'
+                    : 'bg-[var(--text-primary)] text-[var(--bg)] hover:opacity-90'
                 }`}
               >
                 {saved ? (
                   <>
-                    <Check size={18} />
-                    Saved
+                    <CheckIcon size={16} />
+                    <span>Saved</span>
                   </>
                 ) : (
-                  editExpense ? 'Update expense' : 'Save expense'
+                  <>
+                    <PlusIcon size={16} />
+                    <span>{editExpense ? 'Update expense' : 'Save expense'}</span>
+                  </>
                 )}
-              </button>
+              </motion.button>
             </div>
           </motion.div>
         </motion.div>
