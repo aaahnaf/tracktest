@@ -7,7 +7,35 @@ export interface Expense {
   date: string; // ISO date string YYYY-MM-DD
   createdAt: string;
   updatedAt: string;
+  
+  // Memory fields (optional)
+  memoryNote?: string; // "What was this for?"
+  worthItRating?: 'absolutely' | 'mostly' | 'not-really' | 'no';
+  futureMeNote?: string; // "Anything you want to remember?"
+  futureMeReminderDate?: string; // ISO date
+  merchant?: string; // Store/vendor name
+  productName?: string; // Specific product
+  episodeId?: string; // Link to spending episode
+  attachments?: Attachment[]; // Receipts, photos
 }
+
+export interface Attachment {
+  id: string;
+  type: 'image' | 'receipt' | 'other';
+  data: string; // Base64 encoded
+  name: string;
+  createdAt: string;
+}
+
+export interface SpendingEpisode {
+  id: string;
+  name: string;
+  startDate: string;
+  endDate: string;
+  createdAt: string;
+}
+
+export type WorthItRating = 'absolutely' | 'mostly' | 'not-really' | 'no';
 
 export type Category = {
   id: string;
@@ -18,7 +46,7 @@ export type Category = {
 
 export type Theme = 'light' | 'dark' | 'system';
 export type Currency = 'BDT' | 'USD' | 'EUR' | 'GBP' | 'INR';
-export type Page = 'overview' | 'transactions' | 'analytics' | 'settings';
+export type Page = 'overview' | 'transactions' | 'memory' | 'analytics' | 'replay' | 'settings';
 
 export interface Settings {
   theme: Theme;

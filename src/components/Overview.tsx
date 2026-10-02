@@ -2,6 +2,7 @@ import { useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { Expense, Currency, DEFAULT_CATEGORIES } from '../lib/types';
 import { formatCurrency, getGreeting, getMonthStart, getMonthEnd, formatSmartDate, formatRelativeTime, getInsights } from '../lib/utils';
+import { calculateWorthItStats, detectPatterns } from '../lib/analytics';
 import { AnimatedNumber } from './AnimatedNumber';
 import { PlusIcon, ArrowRightIcon, TrendUpIcon, TrendDownIcon, FoodIcon, TransportIcon, ShoppingIcon, BillsIcon, EntertainmentIcon, HealthIcon, EducationIcon, OtherIcon } from './Icons';
 import { parseISO, format } from 'date-fns';
@@ -47,9 +48,37 @@ export function Overview({ expenses, currency, onAddExpense, onNavigate }: Overv
   const lastMonthTotal = lastMonthExpenses.reduce((s, e) => s + e.amount, 0);
   const diff = thisMonthTotal - lastMonthTotal;
   const todayTotal = expenses.filter(e => e.date === format(now, 'yyyy-MM-dd')).reduce((s, e) => s + e.amount, 0);
+  const avgPurchase = thisMonthExpenses.length > 0 ? thisMonthTotal / thisMonthExpenses.length : 0;
 
   const recentExpenses = expenses.slice(0, 5);
   const insights = getInsights(expenses, currency);
+  
+  // Memory insights
+  const worthItStats = useMemo(() => calculateWorthItStats(thisMonthExpenses), [thisMonthExpenses]);
+  const patterns = useMemo(() => detectPatterns(expenses), [expenses]);
+  
+  // Contextual insight - pick the most relevant one
+  const contextualInsight = useMemo(() => {
+    if (worthItStats && worthItStats.total >= 3) {
+      const negativeThisMonth = thisMonthExpenses.filter(e => e.worthItRating === 'not-really' || e.worthItRating === 'no').length;
+      if (negativeThisMonth >= 2) {
+        return `You marked ${negativeThisMonth} purchases this month as not worth it`;
+      }
+    }
+    
+    if (thisMonthExpenses.length > 0) {
+      const largest = thisMonthExpenses.reduce((max, e) => e.amount > max.amount ? e : max, thisMonthExpenses[0]);
+      if (largest.amount > thisMonthTotal * 0.3) {
+        return `Your largest purchase was ${formatCurrency(largest.amount, currency)}`;
+      }
+    }
+    
+    if (patterns.length > 0) {
+      return patterns[0].description;
+    }
+    
+    return null;
+  }, [worthItStats, thisMonthExpenses, patterns, thisMonthTotal, currency]);
 
   if (expenses.length === 0) {
     return (
@@ -108,7 +137,10 @@ export function Overview({ expenses, currency, onAddExpense, onNavigate }: Overv
               prefix={`${currency === 'BDT' ? '৳' : currency === 'USD' ? '$' : currency === 'EUR' ? '€' : currency === 'GBP' ? '£' : '₹'} `}
               className="text-6xl sm:text-7xl font-light tracking-tight text-[var(--text-primary)] large-number"
             />
-            <p className="text-sm text-[var(--text-secondary)] mt-3">Spent this month</p>
+            <p className="text-sm text-[var(--text-secondary)] mt-3">
+              This month. {thisMonthExpenses.length} {thisMonthExpenses.length === 1 ? 'purchase' : 'purchases'}.
+              {avgPurchase > 0 && ` ${formatCurrency(avgPurchase, currency)} average.`}
+            </p>
             
             {lastMonthTotal > 0 && (
               <div className="flex items-center gap-2 mt-3">
@@ -154,6 +186,23 @@ export function Overview({ expenses, currency, onAddExpense, onNavigate }: Overv
           </div>
         )}
       </div>
+
+      {/* Contextual Insight */}
+      {contextualInsight && (
+        <motion.div
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2, duration: 0.3 }}
+          className="mb-8 p-4 border border-[var(--border)] rounded-2xl"
+        >
+          <div className="flex items-start gap-3">
+            <div className="w-1.5 h-1.5 rounded-full bg-[var(--accent)] mt-1.5 shrink-0" />
+            <p className="text-sm text-[var(--text-secondary)] leading-relaxed">
+              {contextualInsight}
+            </p>
+          </div>
+        </motion.div>
+      )}
 
       {/* Today's spending + Quick Add */}
       <div className="grid grid-cols-2 gap-3 mb-10">

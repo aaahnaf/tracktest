@@ -2,6 +2,7 @@ import { useState, useMemo, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Expense, Currency, DEFAULT_CATEGORIES } from '../lib/types';
 import { formatCurrency, formatSmartDate, formatTime, groupExpensesByDate } from '../lib/utils';
+import { parseNaturalQuery } from '../lib/analytics';
 import { SearchIcon, FilterIcon, CloseIcon, EditIcon, TrashIcon, FoodIcon, TransportIcon, ShoppingIcon, BillsIcon, EntertainmentIcon, HealthIcon, EducationIcon, OtherIcon } from './Icons';
 
 interface TransactionsProps {
@@ -45,12 +46,22 @@ export function Transactions({ expenses, currency, onEdit, onDelete }: Transacti
     let result = [...expenses];
     
     if (search) {
-      const q = search.toLowerCase();
-      result = result.filter(e => 
-        e.note.toLowerCase().includes(q) || 
-        e.category.toLowerCase().includes(q) ||
-        e.amount.toString().includes(q)
-      );
+      // Try natural language search first
+      const naturalResults = parseNaturalQuery(search, expenses);
+      if (naturalResults.length > 0) {
+        result = naturalResults;
+      } else {
+        // Fallback to simple text search
+        const q = search.toLowerCase();
+        result = result.filter(e => 
+          e.note.toLowerCase().includes(q) || 
+          e.category.toLowerCase().includes(q) ||
+          e.amount.toString().includes(q) ||
+          e.memoryNote?.toLowerCase().includes(q) ||
+          e.productName?.toLowerCase().includes(q) ||
+          e.merchant?.toLowerCase().includes(q)
+        );
+      }
     }
     
     if (filterCategory !== 'all') {
@@ -105,7 +116,7 @@ export function Transactions({ expenses, currency, onEdit, onDelete }: Transacti
             type="text"
             value={search}
             onChange={e => setSearch(e.target.value)}
-            placeholder="Search (press /)"
+            placeholder="Search or ask: 'How much on food last month?'"
             className="w-full pl-11 pr-4 py-3 text-sm bg-transparent border border-[var(--border)] rounded-full focus:outline-none focus:border-[var(--text-primary)] transition-all text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)]"
           />
           {search && (

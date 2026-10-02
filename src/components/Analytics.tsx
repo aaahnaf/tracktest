@@ -2,6 +2,7 @@ import { useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { Expense, Currency, DEFAULT_CATEGORIES } from '../lib/types';
 import { formatCurrency, getMonthStart, getMonthEnd, getWeekDates, getInsights } from '../lib/utils';
+import { calculateWorthItStats, detectImpulsePatterns } from '../lib/analytics';
 import { AnimatedNumber } from './AnimatedNumber';
 import { FoodIcon, TransportIcon, ShoppingIcon, BillsIcon, EntertainmentIcon, HealthIcon, EducationIcon, OtherIcon } from './Icons';
 import { parseISO, format } from 'date-fns';
@@ -77,6 +78,10 @@ export function Analytics({ expenses, currency }: AnalyticsProps) {
   }, [thisMonthExpenses, thisMonthTotal]);
 
   const insights = getInsights(expenses, currency);
+  
+  // Worth-it analytics
+  const worthItStats = useMemo(() => calculateWorthItStats(expenses), [expenses]);
+  const impulsePatterns = useMemo(() => detectImpulsePatterns(expenses), [expenses]);
 
   const symbol = currency === 'BDT' ? '৳' : currency === 'USD' ? '$' : currency === 'EUR' ? '€' : currency === 'GBP' ? '£' : '₹';
 
@@ -241,6 +246,77 @@ export function Analytics({ expenses, currency }: AnalyticsProps) {
           })}
         </div>
       </div>
+
+      {/* Was it worth it? */}
+      {worthItStats && worthItStats.total >= 3 && (
+        <div>
+          <div className="flex items-center gap-2 mb-6">
+            <div className="w-1.5 h-1.5 rounded-full bg-[var(--accent)]" />
+            <h3 className="technical-text text-[var(--text-secondary)]">Was it worth it?</h3>
+          </div>
+          
+          <div className="p-6 border border-[var(--border)] rounded-2xl mb-4">
+            <div className="flex items-baseline gap-2 mb-2">
+              <span className="text-5xl font-light text-[var(--text-primary)] large-number">
+                {worthItStats.percentage}%
+              </span>
+            </div>
+            <p className="text-sm text-[var(--text-secondary)]">
+              of your {worthItStats.total} remembered purchases were marked positively
+            </p>
+          </div>
+
+          {worthItStats.categoryStats.length > 0 && (
+            <div className="space-y-2">
+              {worthItStats.categoryStats.slice(0, 3).map((stat, i) => (
+                <motion.div
+                  key={stat.category}
+                  initial={{ opacity: 0, y: 6 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.3 + i * 0.05 }}
+                  className="flex items-center justify-between p-4 border border-[var(--border)] rounded-xl"
+                >
+                  <div>
+                    <p className="text-sm font-medium text-[var(--text-primary)] capitalize">{stat.category}</p>
+                    <p className="text-xs text-[var(--text-tertiary)]">{stat.count} purchases</p>
+                  </div>
+                  <span className={`text-lg font-light large-number ${
+                    stat.percentage >= 70 ? 'text-green-600 dark:text-green-400' :
+                    stat.percentage >= 50 ? 'text-[var(--text-primary)]' :
+                    'text-orange-600 dark:text-orange-400'
+                  }`}>
+                    {stat.percentage}%
+                  </span>
+                </motion.div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Impulse Patterns */}
+      {impulsePatterns.length > 0 && (
+        <div>
+          <div className="flex items-center gap-2 mb-6">
+            <div className="w-1.5 h-1.5 rounded-full bg-[var(--accent)]" />
+            <h3 className="technical-text text-[var(--text-secondary)]">Something you might notice</h3>
+          </div>
+          <div className="space-y-2">
+            {impulsePatterns.map((pattern, i) => (
+              <motion.div
+                key={i}
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.4 + i * 0.06 }}
+                className="flex items-start gap-3 p-4 border border-[var(--border)] rounded-xl"
+              >
+                <div className="w-1.5 h-1.5 rounded-full bg-[var(--accent)] mt-1.5 shrink-0" />
+                <p className="text-sm text-[var(--text-secondary)] leading-relaxed">{pattern}</p>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Insights */}
       {insights.length > 0 && (
