@@ -2,8 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Expense, DEFAULT_CATEGORIES, Currency } from '../lib/types';
 import { generateId } from '../lib/utils';
-import { CloseIcon, CheckIcon, PlusIcon } from './Icons';
-import { FoodIcon, TransportIcon, ShoppingIcon, BillsIcon, EntertainmentIcon, HealthIcon, EducationIcon, OtherIcon } from './Icons';
+import { CloseIcon, CheckIcon, PlusIcon, FoodIcon, TransportIcon, ShoppingIcon, BillsIcon, EntertainmentIcon, HealthIcon, EducationIcon, OtherIcon } from './Icons';
 import { haptic } from '../lib/haptic';
 
 interface AddExpenseModalProps {
@@ -132,18 +131,19 @@ export function AddExpenseModal({ isOpen, onClose, onSave, onUpdate, editExpense
             {/* Header */}
             <div className="flex items-center justify-between px-6 pt-6 pb-4 border-b border-[var(--border)]">
               <div className="flex items-center gap-2">
-                <div className="w-1.5 h-1.5 rounded-full bg-[var(--text-primary)]" />
+                <div className="w-1.5 h-1.5 rounded-full bg-[var(--accent)]" />
                 <h2 className="technical-text text-[var(--text-secondary)]">
                   {editExpense ? 'Edit expense' : 'New expense'}
                 </h2>
               </div>
-              <button
+              <motion.button
+                whileTap={{ scale: 0.9 }}
                 onClick={onClose}
                 className="p-2 -mr-2 rounded-full hover:bg-[var(--bg-secondary)] transition-colors"
                 aria-label="Close"
               >
                 <CloseIcon size={16} className="text-[var(--text-secondary)]" />
-              </button>
+              </motion.button>
             </div>
 
             <div className="px-6 py-6 space-y-6">
@@ -161,7 +161,7 @@ export function AddExpenseModal({ isOpen, onClose, onSave, onUpdate, editExpense
                     value={amount}
                     onChange={handleAmountChange}
                     placeholder="0"
-                    className="w-full pl-10 pr-4 py-4 text-4xl font-light bg-transparent border-b-2 border-[var(--border-strong)] focus:outline-none focus:border-[var(--text-primary)] transition-all text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)] large-number"
+                    className="w-full pl-10 pr-4 py-4 text-4xl font-light bg-transparent border-b-2 border-[var(--border-strong)] focus:outline-none focus:border-[var(--accent)] transition-all text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)] large-number"
                   />
                 </div>
               </div>
@@ -202,7 +202,7 @@ export function AddExpenseModal({ isOpen, onClose, onSave, onUpdate, editExpense
                   value={note}
                   onChange={e => setNote(e.target.value)}
                   placeholder="Add a note…"
-                  className="w-full px-4 py-3 bg-transparent border-b border-[var(--border)] focus:outline-none focus:border-[var(--text-primary)] transition-all text-sm text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)]"
+                  className="w-full px-4 py-3 bg-transparent border-b border-[var(--border)] focus:outline-none focus:border-[var(--accent)] transition-all text-sm text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)]"
                 />
               </div>
 
@@ -213,7 +213,7 @@ export function AddExpenseModal({ isOpen, onClose, onSave, onUpdate, editExpense
                   type="date"
                   value={date}
                   onChange={e => setDate(e.target.value)}
-                  className="w-full px-4 py-3 bg-transparent border-b border-[var(--border)] focus:outline-none focus:border-[var(--text-primary)] transition-all text-sm text-[var(--text-primary)]"
+                  className="w-full px-4 py-3 bg-transparent border-b border-[var(--border)] focus:outline-none focus:border-[var(--accent)] transition-all text-sm text-[var(--text-primary)]"
                 />
               </div>
 

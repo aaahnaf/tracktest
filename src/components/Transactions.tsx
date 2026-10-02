@@ -114,14 +114,15 @@ export function Transactions({ expenses, currency, onEdit, onDelete }: Transacti
             </button>
           )}
         </div>
-        <button
+        <motion.button
+          whileTap={{ scale: 0.9 }}
           onClick={() => setShowFilters(!showFilters)}
           className={`p-3 rounded-full border transition-all ${
             showFilters ? 'border-[var(--text-primary)] bg-[var(--bg-secondary)]' : 'border-[var(--border)] hover:border-[var(--border-strong)]'
           }`}
         >
           <FilterIcon size={16} className="text-[var(--text-secondary)]" />
-        </button>
+        </motion.button>
       </div>
 
       {/* Filters */}
@@ -139,24 +140,26 @@ export function Transactions({ expenses, currency, onEdit, onDelete }: Transacti
               <div>
                 <label className="technical-text text-[var(--text-tertiary)] mb-2 block">Category</label>
                 <div className="flex flex-wrap gap-2">
-                  <button
+                  <motion.button
+                    whileTap={{ scale: 0.95 }}
                     onClick={() => setFilterCategory('all')}
                     className={`px-4 py-2 text-xs rounded-full border transition-all ${
                       filterCategory === 'all' ? 'border-[var(--text-primary)] bg-[var(--bg-secondary)] text-[var(--text-primary)]' : 'border-[var(--border)] text-[var(--text-secondary)]'
                     }`}
                   >
                     All
-                  </button>
+                  </motion.button>
                   {DEFAULT_CATEGORIES.map(cat => (
-                    <button
+                    <motion.button
                       key={cat.id}
+                      whileTap={{ scale: 0.95 }}
                       onClick={() => setFilterCategory(cat.id)}
                       className={`px-4 py-2 text-xs rounded-full border transition-all ${
                         filterCategory === cat.id ? 'border-[var(--text-primary)] bg-[var(--bg-secondary)] text-[var(--text-primary)]' : 'border-[var(--border)] text-[var(--text-secondary)]'
                       }`}
                     >
                       {cat.name}
-                    </button>
+                    </motion.button>
                   ))}
                 </div>
               </div>
@@ -165,15 +168,16 @@ export function Transactions({ expenses, currency, onEdit, onDelete }: Transacti
                 <label className="technical-text text-[var(--text-tertiary)] mb-2 block">Sort by</label>
                 <div className="flex flex-wrap gap-2">
                   {(['newest', 'oldest', 'highest', 'lowest'] as const).map(s => (
-                    <button
+                    <motion.button
                       key={s}
+                      whileTap={{ scale: 0.95 }}
                       onClick={() => setSortBy(s)}
                       className={`px-4 py-2 text-xs rounded-full border transition-all ${
                         sortBy === s ? 'border-[var(--text-primary)] bg-[var(--bg-secondary)] text-[var(--text-primary)]' : 'border-[var(--border)] text-[var(--text-secondary)]'
                       }`}
                     >
                       {s === 'highest' ? 'Amount ↓' : s === 'lowest' ? 'Amount ↑' : s === 'newest' ? 'Newest' : 'Oldest'}
-                    </button>
+                    </motion.button>
                   ))}
                 </div>
               </div>
@@ -192,7 +196,7 @@ export function Transactions({ expenses, currency, onEdit, onDelete }: Transacti
           {grouped.map(([dateKey, items]) => (
             <div key={dateKey}>
               <div className="flex items-center gap-2 mb-4">
-                <div className="w-1 h-1 rounded-full bg-[var(--text-primary)]" />
+                <div className="w-1.5 h-1.5 rounded-full bg-[var(--text-primary)]" />
                 <h3 className="technical-text text-[var(--text-secondary)]">
                   {formatSmartDate(dateKey)}
                 </h3>
@@ -229,20 +233,22 @@ export function Transactions({ expenses, currency, onEdit, onDelete }: Transacti
                           −{formatCurrency(expense.amount, currency)}
                         </span>
                         <div className="flex items-center gap-1 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
-                          <button
+                          <motion.button
+                            whileTap={{ scale: 0.9 }}
                             onClick={(e) => { e.stopPropagation(); onEdit(expense); }}
                             className="p-1.5 rounded-full hover:bg-[var(--bg-tertiary)] transition-colors"
                             aria-label="Edit"
                           >
                             <EditIcon size={14} className="text-[var(--text-tertiary)]" />
-                          </button>
-                          <button
+                          </motion.button>
+                          <motion.button
+                            whileTap={{ scale: 0.9 }}
                             onClick={(e) => { e.stopPropagation(); handleDelete(expense.id); }}
                             className="p-1.5 rounded-full hover:bg-red-100 dark:hover:bg-red-950/30 transition-colors"
                             aria-label={isConfirming ? 'Confirm delete' : 'Delete'}
                           >
                             <TrashIcon size={14} className={isConfirming ? 'text-red-500' : 'text-[var(--text-tertiary)]'} />
-                          </button>
+                          </motion.button>
                         </div>
                       </div>
                     </motion.div>

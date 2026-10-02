@@ -66,7 +66,7 @@ export function Settings({ settings, onUpdateSettings, onDeleteAll }: SettingsPr
       {/* Appearance */}
       <div>
         <div className="flex items-center gap-2 mb-5">
-          <div className="w-1 h-1 rounded-full bg-[var(--text-primary)]" />
+          <div className="w-1.5 h-1.5 rounded-full bg-[var(--text-primary)]" />
           <h3 className="technical-text text-[var(--text-secondary)]">Appearance</h3>
         </div>
         <div className="grid grid-cols-3 gap-2">
@@ -99,7 +99,7 @@ export function Settings({ settings, onUpdateSettings, onDeleteAll }: SettingsPr
       {/* Currency */}
       <div>
         <div className="flex items-center gap-2 mb-5">
-          <div className="w-1 h-1 rounded-full bg-[var(--text-primary)]" />
+          <div className="w-1.5 h-1.5 rounded-full bg-[var(--text-primary)]" />
           <h3 className="technical-text text-[var(--text-secondary)]">Currency</h3>
         </div>
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
@@ -123,7 +123,7 @@ export function Settings({ settings, onUpdateSettings, onDeleteAll }: SettingsPr
       {/* Data */}
       <div>
         <div className="flex items-center gap-2 mb-5">
-          <div className="w-1 h-1 rounded-full bg-[var(--text-primary)]" />
+          <div className="w-1.5 h-1.5 rounded-full bg-[var(--text-primary)]" />
           <h3 className="technical-text text-[var(--text-secondary)]">Data</h3>
         </div>
         <div className="space-y-2">

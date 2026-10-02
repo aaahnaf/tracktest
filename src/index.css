@@ -14,7 +14,7 @@
   --text-tertiary: #a3a3a3;
   --border: #e5e5e5;
   --border-strong: #d4d4d4;
-  --accent: #000000;
+  --accent: #d5272b;
   --card: #ffffff;
 }
 
@@ -27,7 +27,7 @@
   --text-tertiary: #525252;
   --border: #262626;
   --border-strong: #404040;
-  --accent: #ffffff;
+  --accent: #ff3b30;
   --card: #0a0a0a;
 }
 
@@ -73,7 +73,7 @@ input[type="number"] {
 .dot-pattern {
   background-image: radial-gradient(circle, var(--text-tertiary) 1px, transparent 1px);
   background-size: 12px 12px;
-  opacity: 0.1;
+  opacity: 0.15;
 }
 
 /* Grid lines */
@@ -82,6 +82,18 @@ input[type="number"] {
     linear-gradient(var(--border) 1px, transparent 1px),
     linear-gradient(90deg, var(--border) 1px, transparent 1px);
   background-size: 20px 20px;
+  opacity: 0.3;
+}
+
+/* Glyph pattern */
+.glyph-pattern {
+  background: repeating-linear-gradient(
+    90deg,
+    transparent,
+    transparent 2px,
+    var(--border) 2px,
+    var(--border) 3px
+  );
   opacity: 0.3;
 }
 
@@ -106,14 +118,14 @@ input[type="number"] {
   to { opacity: 1; transform: scale(1); }
 }
 
-@keyframes drawLine {
-  from { stroke-dashoffset: 100; }
-  to { stroke-dashoffset: 0; }
-}
-
 @keyframes pulse {
   0%, 100% { opacity: 1; }
   50% { opacity: 0.5; }
+}
+
+@keyframes blink {
+  0%, 50% { opacity: 1; }
+  51%, 100% { opacity: 0; }
 }
 
 .animate-fade-in {
@@ -132,9 +144,12 @@ input[type="number"] {
   animation: scaleIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.animate-draw {
-  stroke-dasharray: 100;
-  animation: drawLine 1s ease-out forwards;
+.animate-pulse-slow {
+  animation: pulse 2s ease-in-out infinite;
+}
+
+.animate-blink {
+  animation: blink 1s step-end infinite;
 }
 
 /* Reduced motion */
@@ -166,4 +181,13 @@ input[type="number"] {
   font-variant-numeric: tabular-nums;
   letter-spacing: -0.02em;
   line-height: 0.9;
+}
+
+/* Accent glow */
+.accent-glow {
+  box-shadow: 0 0 20px rgba(213, 39, 43, 0.3);
+}
+
+.dark .accent-glow {
+  box-shadow: 0 0 20px rgba(255, 59, 48, 0.4);
 }

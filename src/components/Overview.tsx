@@ -54,14 +54,18 @@ export function Overview({ expenses, currency, onAddExpense, onNavigate }: Overv
   if (expenses.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[70vh] px-6 text-center animate-fade-in">
-        {/* Decorative dots */}
+        {/* Decorative glyph */}
         <div className="relative mb-12">
-          <div className="absolute inset-0 dot-pattern rounded-full scale-150" />
-          <div className="relative w-24 h-24 border-2 border-[var(--border-strong)] rounded-full flex items-center justify-center">
-            <div className="w-16 h-16 border border-[var(--border)] rounded-full flex items-center justify-center">
-              <div className="w-2 h-2 bg-[var(--text-primary)] rounded-full" />
+          <div className="w-32 h-32 border border-[var(--border)] rounded-full flex items-center justify-center">
+            <div className="w-20 h-20 border border-[var(--border)] rounded-full flex items-center justify-center">
+              <div className="w-3 h-3 rounded-full bg-[var(--accent)] animate-pulse-slow" />
             </div>
           </div>
+          {/* Corner dots */}
+          <div className="absolute top-0 left-0 w-1 h-1 rounded-full bg-[var(--text-tertiary)]" />
+          <div className="absolute top-0 right-0 w-1 h-1 rounded-full bg-[var(--text-tertiary)]" />
+          <div className="absolute bottom-0 left-0 w-1 h-1 rounded-full bg-[var(--text-tertiary)]" />
+          <div className="absolute bottom-0 right-0 w-1 h-1 rounded-full bg-[var(--text-tertiary)]" />
         </div>
 
         <h2 className="text-2xl font-light text-[var(--text-primary)] mb-3 tracking-tight">Nothing spent yet</h2>
@@ -69,16 +73,17 @@ export function Overview({ expenses, currency, onAddExpense, onNavigate }: Overv
           Add your first expense and start seeing where your money goes.
         </p>
         
-        <button
+        <motion.button
+          whileTap={{ scale: 0.97 }}
           onClick={onAddExpense}
-          className="group flex items-center gap-3 px-8 py-4 bg-[var(--text-primary)] text-[var(--bg)] rounded-full font-medium hover:opacity-90 active:scale-[0.97] transition-all"
+          className="group flex items-center gap-3 px-8 py-4 bg-[var(--text-primary)] text-[var(--bg)] rounded-full font-medium hover:opacity-90 transition-all"
         >
           <PlusIcon size={18} />
           <span>Add expense</span>
-        </button>
+        </motion.button>
 
         <div className="mt-12 flex items-center gap-2 text-[var(--text-tertiary)]">
-          <div className="w-1 h-1 rounded-full bg-green-500" />
+          <div className="w-1.5 h-1.5 rounded-full bg-[var(--accent)]" />
           <span className="technical-text">Data stored locally</span>
         </div>
       </div>
@@ -90,7 +95,7 @@ export function Overview({ expenses, currency, onAddExpense, onNavigate }: Overv
       {/* Header with technical styling */}
       <div className="mb-12">
         <div className="flex items-center gap-2 mb-4">
-          <div className="w-1 h-1 rounded-full bg-[var(--text-primary)]" />
+          <div className="w-1.5 h-1.5 rounded-full bg-[var(--accent)]" />
           <span className="technical-text text-[var(--text-secondary)]">{getGreeting()}</span>
         </div>
         
@@ -138,7 +143,11 @@ export function Overview({ expenses, currency, onAddExpense, onNavigate }: Overv
                   initial={{ height: 0 }}
                   animate={{ height: `${height}%` }}
                   transition={{ delay: i * 0.03, duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
-                  className="flex-1 bg-[var(--text-primary)] rounded-sm opacity-20 min-w-[3px] max-w-[6px]"
+                  className="flex-1 rounded-sm min-w-[3px] max-w-[6px]"
+                  style={{ 
+                    backgroundColor: dayTotal > 0 ? 'var(--text-primary)' : 'var(--border)',
+                    opacity: dayTotal > 0 ? 0.8 : 0.3
+                  }}
                 />
               );
             })}
@@ -148,27 +157,31 @@ export function Overview({ expenses, currency, onAddExpense, onNavigate }: Overv
 
       {/* Today's spending + Quick Add */}
       <div className="grid grid-cols-2 gap-3 mb-10">
-        <div className="relative p-5 border border-[var(--border)] rounded-2xl">
-          <span className="technical-text text-[var(--text-tertiary)] block mb-2">Today</span>
+        <div className="relative p-5 border border-[var(--border)] rounded-2xl hover:border-[var(--border-strong)] transition-colors">
+          <div className="flex items-center gap-2 mb-2">
+            <div className="w-1 h-1 rounded-full bg-[var(--accent)]" />
+            <span className="technical-text text-[var(--text-tertiary)]">Today</span>
+          </div>
           <p className="text-2xl font-light text-[var(--text-primary)] large-number">
             {formatCurrency(todayTotal, currency)}
           </p>
         </div>
         
-        <button
+        <motion.button
+          whileTap={{ scale: 0.97 }}
           onClick={onAddExpense}
-          className="group relative p-5 bg-[var(--text-primary)] text-[var(--bg)] rounded-2xl hover:opacity-90 active:scale-[0.97] transition-all flex items-center justify-center gap-2"
+          className="group relative p-5 bg-[var(--text-primary)] text-[var(--bg)] rounded-2xl hover:opacity-90 transition-all flex items-center justify-center gap-2"
         >
           <PlusIcon size={18} />
           <span className="font-medium text-sm">Add expense</span>
-        </button>
+        </motion.button>
       </div>
 
       {/* Recent Transactions */}
       <div className="mb-10">
         <div className="flex items-center justify-between mb-5">
           <div className="flex items-center gap-2">
-            <div className="w-1 h-1 rounded-full bg-[var(--text-primary)]" />
+            <div className="w-1.5 h-1.5 rounded-full bg-[var(--text-primary)]" />
             <h3 className="technical-text text-[var(--text-secondary)]">Recent</h3>
           </div>
           <button
@@ -215,7 +228,7 @@ export function Overview({ expenses, currency, onAddExpense, onNavigate }: Overv
       {insights.length > 0 && (
         <div>
           <div className="flex items-center gap-2 mb-5">
-            <div className="w-1 h-1 rounded-full bg-[var(--text-primary)]" />
+            <div className="w-1.5 h-1.5 rounded-full bg-[var(--accent)]" />
             <h3 className="technical-text text-[var(--text-secondary)]">Insights</h3>
           </div>
           <div className="space-y-2">
@@ -225,9 +238,9 @@ export function Overview({ expenses, currency, onAddExpense, onNavigate }: Overv
                 initial={{ opacity: 0, y: 8 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.3 + i * 0.05, duration: 0.3 }}
-                className="flex items-start gap-3 p-4 border border-[var(--border)] rounded-xl"
+                className="flex items-start gap-3 p-4 border border-[var(--border)] rounded-xl hover:border-[var(--border-strong)] transition-colors"
               >
-                <div className="w-1 h-1 rounded-full bg-[var(--text-primary)] mt-2 shrink-0" />
+                <div className="w-1.5 h-1.5 rounded-full bg-[var(--accent)] mt-2 shrink-0" />
                 <p className="text-sm text-[var(--text-secondary)] leading-relaxed">{insight}</p>
               </motion.div>
             ))}

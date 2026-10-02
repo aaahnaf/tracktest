@@ -54,8 +54,9 @@ export default function App() {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[var(--bg)]">
         <div className="relative">
-          <div className="w-12 h-12 border-2 border-[var(--border)] rounded-full" />
-          <div className="absolute inset-0 w-12 h-12 border-2 border-[var(--text-primary)] rounded-full border-t-transparent animate-spin" />
+          <div className="w-16 h-16 border border-[var(--border)] rounded-full flex items-center justify-center">
+            <div className="w-2 h-2 rounded-full bg-[var(--accent)] animate-pulse-slow" />
+          </div>
         </div>
       </div>
     );
@@ -69,7 +70,10 @@ export default function App() {
           {/* Logo */}
           <div className="mb-10 px-2">
             <h1 className="text-lg font-light text-[var(--text-primary)] tracking-tight">What Did I Spend?</h1>
-            <p className="text-[10px] text-[var(--text-tertiary)] mt-1 technical-text">Track your spending</p>
+            <div className="flex items-center gap-2 mt-1">
+              <div className="w-1.5 h-1.5 rounded-full bg-[var(--accent)]" />
+              <p className="text-[10px] text-[var(--text-tertiary)] technical-text">Track your spending</p>
+            </div>
           </div>
 
           {/* Nav */}
@@ -93,7 +97,7 @@ export default function App() {
                   {isActive && (
                     <motion.div
                       layoutId="activeIndicator"
-                      className="ml-auto w-1.5 h-1.5 rounded-full bg-[var(--text-primary)]"
+                      className="ml-auto w-1.5 h-1.5 rounded-full bg-[var(--accent)]"
                     />
                   )}
                 </motion.button>
@@ -113,7 +117,7 @@ export default function App() {
 
           {/* Privacy note */}
           <div className="mt-6 flex items-center gap-2 px-2">
-            <div className="w-1 h-1 rounded-full bg-green-500" />
+            <div className="w-1.5 h-1.5 rounded-full bg-[var(--accent)]" />
             <p className="technical-text text-[var(--text-tertiary)]">
               Data stored locally
             </p>

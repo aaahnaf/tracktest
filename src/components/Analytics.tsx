@@ -22,6 +22,18 @@ const categoryIcons: Record<string, any> = {
   other: OtherIcon,
 };
 
+// Monochrome palette with subtle variations
+const categoryColors = [
+  '#000000', // Pure black
+  '#404040', // Dark gray
+  '#666666', // Medium gray
+  '#8c8c8c', // Light gray
+  '#b3b3b3', // Lighter gray
+  '#d9d9d9', // Very light gray
+  '#f0f0f0', // Almost white
+  '#a3a3a3', // Neutral gray
+];
+
 export function Analytics({ expenses, currency }: AnalyticsProps) {
   const now = new Date();
   const monthStart = getMonthStart(now);
@@ -54,11 +66,12 @@ export function Analytics({ expenses, currency }: AnalyticsProps) {
       totals[e.category] = (totals[e.category] || 0) + e.amount;
     });
     return Object.entries(totals)
-      .map(([id, amount]) => ({
+      .map(([id, amount], index) => ({
         id,
         amount,
         percentage: thisMonthTotal > 0 ? Math.round((amount / thisMonthTotal) * 100) : 0,
         category: DEFAULT_CATEGORIES.find(c => c.id === id),
+        color: categoryColors[index % categoryColors.length],
       }))
       .sort((a, b) => b.amount - a.amount);
   }, [thisMonthExpenses, thisMonthTotal]);
@@ -83,7 +96,7 @@ export function Analytics({ expenses, currency }: AnalyticsProps) {
         <div className="absolute -left-4 top-0 bottom-0 w-px bg-[var(--border)]" />
         <div className="pl-6">
           <div className="flex items-center gap-2 mb-3">
-            <div className="w-1 h-1 rounded-full bg-[var(--text-primary)]" />
+            <div className="w-1.5 h-1.5 rounded-full bg-[var(--accent)]" />
             <span className="technical-text text-[var(--text-secondary)]">This month</span>
           </div>
           <AnimatedNumber
@@ -98,42 +111,51 @@ export function Analytics({ expenses, currency }: AnalyticsProps) {
       {/* Weekly Chart */}
       <div>
         <div className="flex items-center gap-2 mb-6">
-          <div className="w-1 h-1 rounded-full bg-[var(--text-primary)]" />
+          <div className="w-1.5 h-1.5 rounded-full bg-[var(--text-primary)]" />
           <h3 className="technical-text text-[var(--text-secondary)]">Last 7 days</h3>
         </div>
-        <div className="flex items-end gap-2 h-40 border-b border-[var(--border)] pb-2">
-          {weeklyData.map((day, i) => (
-            <motion.div
-              key={day.date}
-              initial={{ height: 0 }}
-              animate={{ height: `${(day.total / maxWeekly) * 100}%` }}
-              transition={{ delay: i * 0.06, duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-              className="flex-1 flex flex-col items-center gap-2"
-            >
-              <div className="w-full flex-1 flex items-end">
-                <motion.div
-                  className="w-full bg-[var(--text-primary)] rounded-t-sm min-h-[2px]"
-                  initial={{ opacity: 0.3 }}
-                  animate={{ opacity: day.total > 0 ? 1 : 0.2 }}
-                  transition={{ delay: i * 0.06 + 0.3 }}
-                />
-              </div>
-              <span className="technical-text text-[var(--text-tertiary)]">{day.label}</span>
-            </motion.div>
-          ))}
+        <div className="relative">
+          {/* Grid background */}
+          <div className="absolute inset-0 grid-lines rounded-xl" />
+          
+          <div className="relative flex items-end gap-2 h-40 border-b border-[var(--border)] pb-2">
+            {weeklyData.map((day, i) => (
+              <motion.div
+                key={day.date}
+                initial={{ height: 0 }}
+                animate={{ height: `${(day.total / maxWeekly) * 100}%` }}
+                transition={{ delay: i * 0.06, duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+                className="flex-1 flex flex-col items-center gap-2"
+              >
+                <div className="w-full flex-1 flex items-end">
+                  <motion.div
+                    className="w-full rounded-t-sm min-h-[2px]"
+                    style={{ 
+                      backgroundColor: day.total > 0 ? 'var(--text-primary)' : 'var(--border)',
+                      opacity: day.total > 0 ? 0.9 : 0.3
+                    }}
+                    initial={{ opacity: 0.3 }}
+                    animate={{ opacity: day.total > 0 ? 0.9 : 0.3 }}
+                    transition={{ delay: i * 0.06 + 0.3 }}
+                  />
+                </div>
+                <span className="technical-text text-[var(--text-tertiary)]">{day.label}</span>
+              </motion.div>
+            ))}
+          </div>
         </div>
       </div>
 
       {/* Category Breakdown */}
       <div>
         <div className="flex items-center gap-2 mb-6">
-          <div className="w-1 h-1 rounded-full bg-[var(--text-primary)]" />
+          <div className="w-1.5 h-1.5 rounded-full bg-[var(--text-primary)]" />
           <h3 className="technical-text text-[var(--text-secondary)]">By category</h3>
         </div>
         
         {/* Visual indicator */}
         <div className="flex items-center gap-6 mb-8">
-          <div className="relative w-28 h-28 shrink-0">
+          <div className="relative w-32 h-32 shrink-0">
             <svg viewBox="0 0 36 36" className="w-full h-full -rotate-90">
               {categoryBreakdown.reduce<{ elements: JSX.Element[]; offset: number }>((acc, item, i) => {
                 const dashArray = `${item.percentage} ${100 - item.percentage}`;
@@ -142,20 +164,23 @@ export function Analytics({ expenses, currency }: AnalyticsProps) {
                     key={item.id}
                     cx="18" cy="18" r="15.915"
                     fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2.5"
+                    stroke={item.color}
+                    strokeWidth="3"
                     strokeDasharray={dashArray}
                     strokeDashoffset={-acc.offset}
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 - (i * 0.15) }}
-                    transition={{ delay: i * 0.1, duration: 0.4 }}
-                    className="text-[var(--text-primary)]"
+                    initial={{ opacity: 0, strokeWidth: 0 }}
+                    animate={{ opacity: 1, strokeWidth: 3 }}
+                    transition={{ delay: i * 0.1, duration: 0.5 }}
                   />
                 );
                 acc.offset += item.percentage;
                 return acc;
               }, { elements: [], offset: 0 }).elements}
             </svg>
+            {/* Center dot */}
+            <div className="absolute inset-0 flex items-center justify-center">
+              <div className="w-2 h-2 rounded-full bg-[var(--accent)]" />
+            </div>
           </div>
           <div className="flex-1 space-y-3">
             {categoryBreakdown.slice(0, 5).map((item, i) => (
@@ -166,7 +191,10 @@ export function Analytics({ expenses, currency }: AnalyticsProps) {
                 transition={{ delay: i * 0.06 }}
                 className="flex items-center gap-3"
               >
-                <div className="w-2 h-2 rounded-full bg-[var(--text-primary)] shrink-0" style={{ opacity: 1 - (i * 0.15) }} />
+                <div 
+                  className="w-2.5 h-2.5 rounded-full shrink-0"
+                  style={{ backgroundColor: item.color }}
+                />
                 <span className="text-sm text-[var(--text-primary)] flex-1">{item.category?.name}</span>
                 <span className="text-sm text-[var(--text-tertiary)] large-number">{item.percentage}%</span>
               </motion.div>
@@ -184,20 +212,23 @@ export function Analytics({ expenses, currency }: AnalyticsProps) {
                 initial={{ opacity: 0, y: 6 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.3 + i * 0.05 }}
-                className="flex items-center gap-4 p-4 border border-[var(--border)] rounded-xl"
+                className="flex items-center gap-4 p-4 border border-[var(--border)] rounded-xl hover:border-[var(--border-strong)] transition-colors"
               >
-                <div className="w-10 h-10 border border-[var(--border)] rounded-xl flex items-center justify-center shrink-0">
-                  <Icon size={18} className="text-[var(--text-secondary)]" />
+                <div 
+                  className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0"
+                  style={{ backgroundColor: `${item.color}15` }}
+                >
+                  <Icon size={18} style={{ color: item.color }} />
                 </div>
                 <div className="flex-1">
                   <p className="text-sm font-medium text-[var(--text-primary)] mb-2">{item.category?.name}</p>
-                  <div className="h-1 bg-[var(--bg-tertiary)] rounded-full overflow-hidden">
+                  <div className="h-1.5 bg-[var(--bg-tertiary)] rounded-full overflow-hidden">
                     <motion.div
                       initial={{ width: 0 }}
                       animate={{ width: `${item.percentage}%` }}
                       transition={{ delay: 0.4 + i * 0.06, duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-                      className="h-full bg-[var(--text-primary)] rounded-full"
-                      style={{ opacity: 0.8 - (i * 0.1) }}
+                      className="h-full rounded-full"
+                      style={{ backgroundColor: item.color }}
                     />
                   </div>
                 </div>
@@ -215,7 +246,7 @@ export function Analytics({ expenses, currency }: AnalyticsProps) {
       {insights.length > 0 && (
         <div>
           <div className="flex items-center gap-2 mb-6">
-            <div className="w-1 h-1 rounded-full bg-[var(--text-primary)]" />
+            <div className="w-1.5 h-1.5 rounded-full bg-[var(--accent)]" />
             <h3 className="technical-text text-[var(--text-secondary)]">Insights</h3>
           </div>
           <div className="space-y-2">
@@ -225,9 +256,9 @@ export function Analytics({ expenses, currency }: AnalyticsProps) {
                 initial={{ opacity: 0, y: 8 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.4 + i * 0.06 }}
-                className="flex items-start gap-3 p-4 border border-[var(--border)] rounded-xl"
+                className="flex items-start gap-3 p-4 border border-[var(--border)] rounded-xl hover:border-[var(--border-strong)] transition-colors"
               >
-                <div className="w-1 h-1 rounded-full bg-[var(--text-primary)] mt-2 shrink-0" />
+                <div className="w-1.5 h-1.5 rounded-full bg-[var(--accent)] mt-2 shrink-0" />
                 <p className="text-sm text-[var(--text-secondary)] leading-relaxed">{insight}</p>
               </motion.div>
             ))}
