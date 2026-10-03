@@ -1,8 +1,9 @@
 import { useState, useRef } from 'react';
 import { motion } from 'framer-motion';
-import { Settings as SettingsType, Theme, Currency, CURRENCY_SYMBOLS } from '../lib/types';
+import { Settings as SettingsType, Theme, Currency } from '../lib/types';
 import { DownloadIcon, UploadIcon, TrashIcon, ShieldIcon } from './Icons';
 import { exportData, importData, deleteAllExpenses } from '../lib/db';
+import { CURRENCIES } from '../lib/currencies';
 
 interface SettingsProps {
   settings: SettingsType;
@@ -53,13 +54,10 @@ export function Settings({ settings, onUpdateSettings, onDeleteAll }: SettingsPr
     { value: 'system', label: 'System' },
   ];
 
-  const currencies: { value: Currency; label: string }[] = [
-    { value: 'BDT', label: `BDT ${CURRENCY_SYMBOLS.BDT}` },
-    { value: 'USD', label: `USD ${CURRENCY_SYMBOLS.USD}` },
-    { value: 'EUR', label: `EUR ${CURRENCY_SYMBOLS.EUR}` },
-    { value: 'GBP', label: `GBP ${CURRENCY_SYMBOLS.GBP}` },
-    { value: 'INR', label: `INR ${CURRENCY_SYMBOLS.INR}` },
-  ];
+  const currencies = CURRENCIES.map(c => ({
+    value: c.code,
+    label: `${c.code} ${c.symbol}`
+  }));
 
   return (
     <div className="animate-fade-in space-y-10 max-w-lg">
@@ -102,21 +100,23 @@ export function Settings({ settings, onUpdateSettings, onDeleteAll }: SettingsPr
           <div className="w-1.5 h-1.5 rounded-full bg-[var(--text-primary)]" />
           <h3 className="technical-text text-[var(--text-secondary)]">Currency</h3>
         </div>
-        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-          {currencies.map(c => (
-            <motion.button
-              key={c.value}
-              whileTap={{ scale: 0.97 }}
-              onClick={() => onUpdateSettings({ currency: c.value })}
-              className={`px-4 py-4 rounded-xl border text-sm font-medium transition-all ${
-                settings.currency === c.value
-                  ? 'border-[var(--text-primary)] bg-[var(--bg-secondary)] text-[var(--text-primary)]'
-                  : 'border-[var(--border)] text-[var(--text-secondary)] hover:border-[var(--border-strong)]'
-              }`}
-            >
-              {c.label}
-            </motion.button>
-          ))}
+        <div className="max-h-96 overflow-y-auto border border-[var(--border)] rounded-xl">
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-0">
+            {currencies.map(c => (
+              <motion.button
+                key={c.value}
+                whileTap={{ scale: 0.97 }}
+                onClick={() => onUpdateSettings({ currency: c.value })}
+                className={`px-4 py-3 text-sm font-medium transition-all border-b border-r border-[var(--border)] ${
+                  settings.currency === c.value
+                    ? 'bg-[var(--bg-secondary)] text-[var(--text-primary)]'
+                    : 'text-[var(--text-secondary)] hover:bg-[var(--bg-secondary)]/50'
+                }`}
+              >
+                {c.label}
+              </motion.button>
+            ))}
+          </div>
         </div>
       </div>
 

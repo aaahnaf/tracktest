@@ -17,6 +17,37 @@ A premium, minimalist, monochrome expense tracker with deep memory features, ins
 
 **Artistic & distinctive** — Custom SVG icons, perfect alignment, and satisfying animations make this more than just another expense tracker.
 
+## ✨ What's New
+
+### 🎨 Enhanced Design & Animations
+- **Dramatic animations** — Slower, more cinematic transitions (500-800ms)
+- **Dot matrix elements** — Nothing-inspired decorative patterns throughout
+- **Glass morphism** — Frosted glass effects on navigation
+- **Accent glow effects** — Pulsing red accent indicators
+- **Smooth page transitions** — Scale + fade + slide animations
+
+### 🌍 Complete Currency Support
+- **95+ world currencies** — Every major currency supported
+- **Scrollable currency picker** — Easy to find any currency
+- **Organized by region** — Logical grouping for easy selection
+
+### 📱 Home Screen Widgets
+- **Widget page** — Dedicated widgets view with spending summaries
+- **Quick add widget** — One-tap expense addition
+- **Monthly total widget** — At-a-glance spending overview
+- **Today's spending widget** — Daily tracking
+- **Recent categories widget** — Quick category access
+- **PWA shortcuts** — Long-press app icon for quick actions
+- **Deep linking** — URL parameters for direct navigation
+
+### 🎭 Visual Enhancements
+- **Dot matrix backgrounds** — Decorative patterns on cards
+- **Pulsing indicators** — Animated accent dots
+- **Gradient overlays** — Subtle depth effects
+- **Improved empty states** — More engaging placeholder designs
+
+---
+
 ## Features
 
 ### 🧠 Spending Memory (Signature Feature)
@@ -73,13 +104,26 @@ Falls back to regular text search if query can't be parsed.
 - Impulse pattern detection
 - Smart insights from your own data
 
-### 🎨 Design
+### 🎨 Design & Animations
 - **Monochrome palette** — Pure black/white/grays with signature red accent (#d5272b)
 - **Custom SVG icons** — 20+ hand-crafted icons, no emoji
 - **Technical typography** — JetBrains Mono for labels, Inter for body
-- **Dot-matrix elements** — Decorative patterns and indicators
+- **Dot-matrix elements** — Nothing-inspired decorative patterns throughout
+  - Dense dot patterns on cards
+  - Accent-colored dot matrices
+  - Circular dot decorations
+  - Grid line backgrounds
 - **Perfect alignment** — Grid-based layouts with pixel-perfect spacing
-- **Satisfying animations** — 150-400ms with natural easing
+- **Dramatic animations** — Slower, more cinematic transitions
+  - Page transitions: 500ms with scale + fade + slide
+  - Number counters: 800ms smooth interpolation
+  - Modal animations: 600ms with dramatic entrance
+  - Card animations: 600ms staggered reveals
+  - Natural easing: cubic-bezier(0.16, 1, 0.3, 1)
+- **Glass morphism** — Frosted glass effects on navigation
+- **Accent glow effects** — Pulsing red accent indicators
+- **Smooth transitions** — 400ms cubic-bezier for all interactions
+- **Reduced motion support** — Respects user preferences
 
 ### 🔒 Privacy & Offline
 - 100% offline — no server required
@@ -97,10 +141,29 @@ Falls back to regular text search if query can't be parsed.
 ### 📱 Progressive Disclosure
 The app starts simple and reveals features contextually:
 - Overview, Transactions, Memory, Analytics in main navigation
-- Replay accessible from navigation
+- Replay and Widgets accessible from navigation
 - Memory fields optional in expense form
 - Insights appear only when relevant
 - Patterns detected only with enough data
+
+### 📲 PWA Features & Widgets
+- **Installable** — Add to home screen on mobile and desktop
+- **Offline support** — Service worker caches all assets
+- **App shortcuts** — Long-press icon for quick actions:
+  - "Add Expense" — Opens expense form directly
+  - "View Widgets" — Jumps to widgets page
+- **Widget views** — Dedicated widget-style layouts:
+  - Monthly spending summary
+  - Today's spending
+  - Quick add button
+  - Recent categories
+- **Deep linking** — URL parameters for direct navigation:
+  - `?action=add` — Open add expense modal
+  - `?page=widgets` — Go to widgets page
+  - `?widget=summary` — Show summary widget
+  - `?widget=add` — Show quick add widget
+- **Theme color** — Adapts to light/dark mode
+- **Standalone mode** — Runs like a native app
 
 ### 🎯 Core Experience
 **Track → Remember → Reflect → Understand**
@@ -109,12 +172,25 @@ Normal expense tracker: "You spent ৳500."
 What Did I Spend?: "You spent ৳500 on this six months ago. You wrote that it was worth it. You paid ৳300 less than your previous similar purchase."
 
 ### Pages
-- **Overview** — Monthly total with animated counter, contextual insights, month-over-month comparison, mini sparkline, today's spending, recent transactions, smart insights
+- **Overview** — Monthly total with animated counter, contextual insights, month-over-month comparison, mini sparkline, today's spending, recent transactions, smart insights, dot matrix decorations
 - **Transactions** — Full history grouped by date, natural language search, category filter, sort options, tap-to-edit on mobile
 - **Memory** — Your spending memories organized by month, showing what purchases were for and whether they were worth it
 - **Analytics** — Weekly bar chart, category donut chart, worth-it statistics, impulse patterns, detailed breakdowns
 - **Replay** — Interactive timeline scrubbing through your spending history with animated cumulative totals
-- **Settings** — Theme (Light/Dark/System), Currency (BDT/USD/EUR/GBP/INR), data management, privacy notice
+- **Widgets** — Home screen widget-style views showing spending summaries and quick actions
+- **Settings** — Theme (Light/Dark/System), 95+ world currencies, data management, privacy notice
+
+### 🌍 Currency Support
+Complete list of 95+ world currencies including:
+- **Major**: USD, EUR, GBP, JPY, CNY, INR, BDT
+- **South Asia**: PKR, LKR, NPR
+- **Oceania**: AUD, NZD
+- **Americas**: CAD, MXN, BRL, ARS, CLP, COP, PEN
+- **Europe**: CHF, SEK, NOK, DKK, PLN, CZK, HUF, RON, and more
+- **Asia**: SGD, HKD, KRW, TWD, THB, MYR, IDR, PHP, VND, and more
+- **Middle East**: AED, SAR, QAR, KWD, BHD, OMR, ILS, and more
+- **Africa**: ZAR, EGP, NGN, KES, GHS, and more
+- **Eastern Europe**: RUB, TRY, UAH, GEL, and more
 
 ### Design Elements
 - **Monochrome palette** — Pure black/white/grays only

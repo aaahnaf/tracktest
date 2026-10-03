@@ -149,12 +149,14 @@ export function AddExpenseModal({ isOpen, onClose, onSave, onUpdate, editExpense
           
           {/* Modal */}
           <motion.div
-            initial={{ opacity: 0, y: 50, scale: 0.96 }}
+            initial={{ opacity: 0, y: 80, scale: 0.9 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 30, scale: 0.97 }}
-            transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
+            exit={{ opacity: 0, y: 50, scale: 0.95 }}
+            transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
             className="relative w-full sm:max-w-md bg-[var(--bg)] sm:rounded-3xl rounded-t-3xl border border-[var(--border-strong)] max-h-[92vh] overflow-y-auto"
           >
+            {/* Dot matrix decoration */}
+            <div className="absolute top-0 right-0 w-32 h-32 dot-pattern opacity-10 rounded-full" />
             {/* Header */}
             <div className="flex items-center justify-between px-6 pt-6 pb-4 border-b border-[var(--border)]">
               <div className="flex items-center gap-2">

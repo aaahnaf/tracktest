@@ -1,7 +1,7 @@
 {
   "name": "What Did I Spend?",
   "short_name": "Spending",
-  "description": "A premium monochrome expense tracker",
+  "description": "A personal spending memory. Track, remember, reflect.",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#ffffff",
@@ -13,6 +13,46 @@
       "sizes": "any",
       "type": "image/svg+xml",
       "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Add Expense",
+      "short_name": "Add",
+      "description": "Quickly add a new expense",
+      "url": "/?action=add",
+      "icons": [
+        {
+          "src": "/icon.svg",
+          "sizes": "any"
+        }
+      ]
+    },
+    {
+      "name": "View Widgets",
+      "short_name": "Widgets",
+      "description": "View spending widgets",
+      "url": "/?page=widgets",
+      "icons": [
+        {
+          "src": "/icon.svg",
+          "sizes": "any"
+        }
+      ]
+    }
+  ],
+  "widgets": [
+    {
+      "name": "Spending Summary",
+      "description": "View your monthly spending at a glance",
+      "tag": "spending-summary",
+      "target": "/?widget=summary"
+    },
+    {
+      "name": "Quick Add",
+      "description": "Quickly add a new expense",
+      "tag": "quick-add",
+      "target": "/?widget=add"
     }
   ]
 }

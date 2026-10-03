@@ -8,7 +8,7 @@ interface AnimatedNumberProps {
   duration?: number;
 }
 
-export function AnimatedNumber({ value, prefix = '', suffix = '', className = '', duration = 400 }: AnimatedNumberProps) {
+export function AnimatedNumber({ value, prefix = '', suffix = '', className = '', duration = 800 }: AnimatedNumberProps) {
   const [display, setDisplay] = useState(value);
   const prevValue = useRef(value);
   const rafRef = useRef<number>();

@@ -101,7 +101,10 @@ export function Replay({ expenses, currency }: ReplayProps) {
   }
 
   return (
-    <div className="animate-fade-in space-y-8">
+    <div className="animate-fade-in space-y-8 relative">
+      {/* Decorative dot matrix */}
+      <div className="absolute top-10 left-0 w-32 h-32 dot-pattern opacity-10 rounded-full" />
+      
       {/* Period selector */}
       <div className="flex items-center gap-2">
         {(['week', 'month', 'year'] as const).map(p => (

@@ -45,8 +45,18 @@ export type Category = {
 };
 
 export type Theme = 'light' | 'dark' | 'system';
-export type Currency = 'BDT' | 'USD' | 'EUR' | 'GBP' | 'INR';
-export type Page = 'overview' | 'transactions' | 'memory' | 'analytics' | 'replay' | 'settings';
+export type Currency = 
+  | 'USD' | 'EUR' | 'GBP' | 'JPY' | 'CNY' | 'INR' | 'BDT' | 'PKR' | 'LKR' | 'NPR'
+  | 'AUD' | 'CAD' | 'CHF' | 'SEK' | 'NOK' | 'DKK' | 'NZD' | 'SGD' | 'HKD' | 'KRW'
+  | 'MXN' | 'BRL' | 'ZAR' | 'RUB' | 'TRY' | 'AED' | 'SAR' | 'QAR' | 'KWD' | 'BHD'
+  | 'OMR' | 'JOD' | 'EGP' | 'NGN' | 'KES' | 'GHS' | 'TZS' | 'UGX' | 'MAD' | 'TND'
+  | 'PLN' | 'CZK' | 'HUF' | 'RON' | 'BGN' | 'HRK' | 'RSD' | 'UAH' | 'BYN' | 'GEL'
+  | 'THB' | 'MYR' | 'IDR' | 'PHP' | 'VND' | 'MMK' | 'KHR' | 'LAK' | 'BND' | 'TWD'
+  | 'ARS' | 'CLP' | 'COP' | 'PEN' | 'UYU' | 'PYG' | 'BOB' | 'CRC' | 'PAB' | 'DOP'
+  | 'ILS' | 'IRR' | 'IQD' | 'LBP' | 'SYP' | 'YER' | 'AFN' | 'KZT' | 'UZS' | 'TJS'
+  | 'MNT' | 'ISK' | 'BAM' | 'MKD' | 'ALL' | 'AMD' | 'AZN' | 'MDL' | 'KGS' | 'TMT';
+
+export type Page = 'overview' | 'transactions' | 'memory' | 'analytics' | 'replay' | 'settings' | 'widgets';
 
 export interface Settings {
   theme: Theme;
@@ -66,11 +76,15 @@ export const DEFAULT_CATEGORIES: Category[] = [
 ];
 
 export const CURRENCY_SYMBOLS: Record<Currency, string> = {
-  BDT: '৳',
-  USD: '$',
-  EUR: '€',
-  GBP: '£',
-  INR: '₹',
+  USD: '$', EUR: '€', GBP: '£', JPY: '¥', CNY: '¥', INR: '₹', BDT: '৳', PKR: '₨', LKR: '₨', NPR: '₨',
+  AUD: 'A$', CAD: 'C$', CHF: 'CHF', SEK: 'kr', NOK: 'kr', DKK: 'kr', NZD: 'NZ$', SGD: 'S$', HKD: 'HK$', KRW: '₩',
+  MXN: 'MX$', BRL: 'R$', ZAR: 'R', RUB: '₽', TRY: '₺', AED: 'د.إ', SAR: '﷼', QAR: '﷼', KWD: 'د.ك', BHD: '.د.ب',
+  OMR: '﷼', JOD: 'د.ا', EGP: '£', NGN: '₦', KES: 'KSh', GHS: '₵', TZS: 'TSh', UGX: 'USh', MAD: 'د.م.', TND: 'د.ت',
+  PLN: 'zł', CZK: 'Kč', HUF: 'Ft', RON: 'lei', BGN: 'лв', HRK: 'kn', RSD: 'дин.', UAH: '₴', BYN: 'Br', GEL: '₾',
+  THB: '฿', MYR: 'RM', IDR: 'Rp', PHP: '₱', VND: '₫', MMK: 'K', KHR: '៛', LAK: '₭', BND: 'B$', TWD: 'NT$',
+  ARS: '$', CLP: '$', COP: '$', PEN: 'S/.', UYU: '$U', PYG: '₲', BOB: 'Bs.', CRC: '₡', PAB: 'B/.', DOP: 'RD$',
+  ILS: '₪', IRR: '﷼', IQD: 'ع.د', LBP: 'ل.ل', SYP: '£', YER: '﷼', AFN: '؋', KZT: '₸', UZS: 'лв', TJS: 'ЅМ',
+  MNT: '₮', ISK: 'kr', BAM: 'KM', MKD: 'ден', ALL: 'L', AMD: '֏', AZN: '₼', MDL: 'L', KGS: 'лв', TMT: 'T',
 };
 
 export const DEFAULT_SETTINGS: Settings = {

@@ -106,9 +106,12 @@ export function Transactions({ expenses, currency, onEdit, onDelete }: Transacti
   }
 
   return (
-    <div className="animate-fade-in">
+    <div className="animate-fade-in relative">
+      {/* Decorative dot matrix */}
+      <div className="absolute -top-10 -left-10 w-32 h-32 dot-pattern-dense opacity-10 rounded-full" />
+      
       {/* Search & Filter Bar */}
-      <div className="flex items-center gap-2 mb-6">
+      <div className="flex items-center gap-2 mb-6 relative">
         <div className="flex-1 relative">
           <SearchIcon size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--text-tertiary)]" />
           <input

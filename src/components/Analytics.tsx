@@ -95,7 +95,10 @@ export function Analytics({ expenses, currency }: AnalyticsProps) {
   }
 
   return (
-    <div className="animate-fade-in space-y-12">
+    <div className="animate-fade-in space-y-12 relative">
+      {/* Decorative dot matrix */}
+      <div className="absolute -top-20 -right-20 w-48 h-48 dot-pattern-accent opacity-20 rounded-full" />
+      
       {/* Monthly Total */}
       <div className="relative">
         <div className="absolute -left-4 top-0 bottom-0 w-px bg-[var(--border)]" />

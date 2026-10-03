@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { GridIcon, ListIcon, ChartIcon, SettingsIcon, PlusIcon, HeartIcon } from './components/Icons';
+import { GridIcon, ListIcon, ChartIcon, SettingsIcon, PlusIcon, HeartIcon, DotIcon } from './components/Icons';
 import { useExpenses } from './hooks/useExpenses';
 import { useSettings } from './hooks/useSettings';
 import { useTheme } from './hooks/useTheme';
@@ -10,6 +10,7 @@ import { Transactions } from './components/Transactions';
 import { Memory } from './components/Memory';
 import { Analytics } from './components/Analytics';
 import { Replay } from './components/Replay';
+import { Widgets } from './components/Widgets';
 import { Settings } from './components/Settings';
 import { AddExpenseModal } from './components/AddExpenseModal';
 
@@ -19,6 +20,7 @@ const NAV_ITEMS: { id: Page; label: string; icon: any }[] = [
   { id: 'memory', label: 'Memory', icon: HeartIcon },
   { id: 'analytics', label: 'Analytics', icon: ChartIcon },
   { id: 'replay', label: 'Replay', icon: ChartIcon },
+  { id: 'widgets', label: 'Widgets', icon: DotIcon },
   { id: 'settings', label: 'Settings', icon: SettingsIcon },
 ];
 
@@ -30,6 +32,25 @@ export default function App() {
   const { expenses, loading, addExpense, updateExpense, deleteExpense, deleteAll } = useExpenses();
   const { settings, updateSettings } = useSettings();
   const resolvedTheme = useTheme(settings.theme);
+
+  // Handle URL parameters for shortcuts and widgets
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const action = params.get('action');
+    const pageParam = params.get('page');
+    const widget = params.get('widget');
+
+    if (action === 'add') {
+      setShowAddModal(true);
+    } else if (pageParam && ['overview', 'transactions', 'memory', 'analytics', 'replay', 'widgets', 'settings'].includes(pageParam)) {
+      setPage(pageParam as Page);
+    } else if (widget === 'summary' || widget === 'add') {
+      setPage('widgets');
+      if (widget === 'add') {
+        setTimeout(() => setShowAddModal(true), 300);
+      }
+    }
+  }, []);
 
   // Keyboard shortcuts
   useEffect(() => {
@@ -121,11 +142,14 @@ export default function App() {
 
           {/* Privacy note */}
           <div className="mt-6 flex items-center gap-2 px-2">
-            <div className="w-1.5 h-1.5 rounded-full bg-[var(--accent)]" />
+            <div className="w-1.5 h-1.5 rounded-full bg-[var(--accent)] animate-pulse-slow" />
             <p className="technical-text text-[var(--text-tertiary)]">
               Data stored locally
             </p>
           </div>
+
+          {/* Decorative dot matrix */}
+          <div className="absolute bottom-20 right-4 w-24 h-24 dot-pattern opacity-10" />
         </aside>
 
         {/* Main Content */}
@@ -154,10 +178,10 @@ export default function App() {
             <AnimatePresence mode="wait">
               <motion.div
                 key={page}
-                initial={{ opacity: 0, y: 8 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -6 }}
-                transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+                initial={{ opacity: 0, y: 20, scale: 0.98 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: -15, scale: 0.98 }}
+                transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
               >
                 {page === 'overview' && (
                   <Overview
@@ -192,6 +216,13 @@ export default function App() {
                   <Replay
                     expenses={expenses}
                     currency={settings.currency}
+                  />
+                )}
+                {page === 'widgets' && (
+                  <Widgets
+                    expenses={expenses}
+                    currency={settings.currency}
+                    onAddExpense={() => setShowAddModal(true)}
                   />
                 )}
                 {page === 'settings' && (
@@ -256,16 +287,16 @@ export default function App() {
             <span className="text-[10px] font-medium">Memory</span>
           </motion.button>
 
-          {/* Analytics */}
+          {/* Widgets */}
           <motion.button
             whileTap={{ scale: 0.9 }}
-            onClick={() => setPage('analytics')}
+            onClick={() => setPage('widgets')}
             className={`flex flex-col items-center gap-1 px-3 py-2 rounded-xl transition-all min-w-[60px] ${
-              page === 'analytics' ? 'text-[var(--text-primary)]' : 'text-[var(--text-tertiary)]'
+              page === 'widgets' ? 'text-[var(--text-primary)]' : 'text-[var(--text-tertiary)]'
             }`}
           >
-            <ChartIcon size={20} />
-            <span className="text-[10px] font-medium">Analytics</span>
+            <DotIcon size={20} />
+            <span className="text-[10px] font-medium">Widgets</span>
           </motion.button>
         </div>
       </nav>

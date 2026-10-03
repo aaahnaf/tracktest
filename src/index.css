@@ -16,6 +16,7 @@
   --border-strong: #d4d4d4;
   --accent: #d5272b;
   --card: #ffffff;
+  --shadow: rgba(0, 0, 0, 0.05);
 }
 
 .dark {
@@ -29,6 +30,7 @@
   --border-strong: #404040;
   --accent: #ff3b30;
   --card: #0a0a0a;
+  --shadow: rgba(255, 255, 255, 0.05);
 }
 
 * {
@@ -42,7 +44,8 @@ html {
 body {
   background-color: var(--bg);
   color: var(--text-primary);
-  transition: background-color 0.3s ease, color 0.3s ease;
+  transition: background-color 0.5s cubic-bezier(0.4, 0, 0.2, 1), 
+              color 0.5s cubic-bezier(0.4, 0, 0.2, 1);
   overscroll-behavior: none;
   font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
 }
@@ -69,11 +72,23 @@ input[type="number"] {
   -moz-appearance: textfield;
 }
 
-/* Dot matrix pattern */
+/* Dot matrix pattern - Nothing inspired */
 .dot-pattern {
   background-image: radial-gradient(circle, var(--text-tertiary) 1px, transparent 1px);
-  background-size: 12px 12px;
+  background-size: 16px 16px;
   opacity: 0.15;
+}
+
+.dot-pattern-dense {
+  background-image: radial-gradient(circle, var(--text-tertiary) 0.5px, transparent 0.5px);
+  background-size: 8px 8px;
+  opacity: 0.2;
+}
+
+.dot-pattern-accent {
+  background-image: radial-gradient(circle, var(--accent) 1px, transparent 1px);
+  background-size: 20px 20px;
+  opacity: 0.1;
 }
 
 /* Grid lines */
@@ -81,7 +96,7 @@ input[type="number"] {
   background-image: 
     linear-gradient(var(--border) 1px, transparent 1px),
     linear-gradient(90deg, var(--border) 1px, transparent 1px);
-  background-size: 20px 20px;
+  background-size: 24px 24px;
   opacity: 0.3;
 }
 
@@ -97,25 +112,43 @@ input[type="number"] {
   opacity: 0.3;
 }
 
-/* Animations */
+/* Animations - Dramatic and smooth */
 @keyframes fadeIn {
   from { opacity: 0; }
   to { opacity: 1; }
 }
 
 @keyframes slideUp {
-  from { opacity: 0; transform: translateY(20px); }
-  to { opacity: 1; transform: translateY(0); }
+  from { 
+    opacity: 0; 
+    transform: translateY(30px) scale(0.98);
+  }
+  to { 
+    opacity: 1; 
+    transform: translateY(0) scale(1);
+  }
 }
 
 @keyframes slideDown {
-  from { opacity: 0; transform: translateY(-10px); }
-  to { opacity: 1; transform: translateY(0); }
+  from { 
+    opacity: 0; 
+    transform: translateY(-15px);
+  }
+  to { 
+    opacity: 1; 
+    transform: translateY(0);
+  }
 }
 
 @keyframes scaleIn {
-  from { opacity: 0; transform: scale(0.95); }
-  to { opacity: 1; transform: scale(1); }
+  from { 
+    opacity: 0; 
+    transform: scale(0.92);
+  }
+  to { 
+    opacity: 1; 
+    transform: scale(1);
+  }
 }
 
 @keyframes pulse {
@@ -128,28 +161,59 @@ input[type="number"] {
   51%, 100% { opacity: 0; }
 }
 
+@keyframes glow {
+  0%, 100% { 
+    box-shadow: 0 0 20px rgba(213, 39, 43, 0.3);
+  }
+  50% { 
+    box-shadow: 0 0 40px rgba(213, 39, 43, 0.5);
+  }
+}
+
+@keyframes shimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+@keyframes rotate {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
 .animate-fade-in {
-  animation: fadeIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  animation: fadeIn 0.6s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .animate-slide-up {
-  animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  animation: slideUp 0.7s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .animate-slide-down {
-  animation: slideDown 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  animation: slideDown 0.5s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .animate-scale-in {
-  animation: scaleIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  animation: scaleIn 0.5s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .animate-pulse-slow {
-  animation: pulse 2s ease-in-out infinite;
+  animation: pulse 3s ease-in-out infinite;
 }
 
 .animate-blink {
-  animation: blink 1s step-end infinite;
+  animation: blink 1.5s step-end infinite;
+}
+
+.animate-glow {
+  animation: glow 2s ease-in-out infinite;
+}
+
+.animate-shimmer {
+  animation: shimmer 2s ease-in-out infinite;
+}
+
+.animate-rotate {
+  animation: rotate 20s linear infinite;
 }
 
 /* Reduced motion */
@@ -170,7 +234,7 @@ input[type="number"] {
 /* Technical text styling */
 .technical-text {
   font-family: var(--font-mono);
-  letter-spacing: 0.05em;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
   font-size: 0.625rem;
   font-weight: 500;
@@ -179,15 +243,31 @@ input[type="number"] {
 /* Large number display */
 .large-number {
   font-variant-numeric: tabular-nums;
-  letter-spacing: -0.02em;
+  letter-spacing: -0.03em;
   line-height: 0.9;
 }
 
 /* Accent glow */
 .accent-glow {
-  box-shadow: 0 0 20px rgba(213, 39, 43, 0.3);
+  box-shadow: 0 0 30px rgba(213, 39, 43, 0.4);
 }
 
 .dark .accent-glow {
-  box-shadow: 0 0 20px rgba(255, 59, 48, 0.4);
+  box-shadow: 0 0 30px rgba(255, 59, 48, 0.5);
+}
+
+/* Smooth transitions */
+.smooth-transition {
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Glass effect */
+.glass {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+
+.dark .glass {
+  background: rgba(0, 0, 0, 0.7);
 }

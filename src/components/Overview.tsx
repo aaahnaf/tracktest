@@ -122,9 +122,12 @@ export function Overview({ expenses, currency, onAddExpense, onNavigate }: Overv
   return (
     <div className="animate-fade-in">
       {/* Header with technical styling */}
-      <div className="mb-12">
+      <div className="relative mb-12">
+        {/* Dot matrix background decoration */}
+        <div className="absolute -top-20 -right-20 w-40 h-40 dot-pattern opacity-20 rounded-full" />
+        
         <div className="flex items-center gap-2 mb-4">
-          <div className="w-1.5 h-1.5 rounded-full bg-[var(--accent)]" />
+          <div className="w-1.5 h-1.5 rounded-full bg-[var(--accent)] animate-pulse-slow" />
           <span className="technical-text text-[var(--text-secondary)]">{getGreeting()}</span>
         </div>
         
@@ -206,23 +209,41 @@ export function Overview({ expenses, currency, onAddExpense, onNavigate }: Overv
 
       {/* Today's spending + Quick Add */}
       <div className="grid grid-cols-2 gap-3 mb-10">
-        <div className="relative p-5 border border-[var(--border)] rounded-2xl hover:border-[var(--border-strong)] transition-colors">
-          <div className="flex items-center gap-2 mb-2">
-            <div className="w-1 h-1 rounded-full bg-[var(--accent)]" />
-            <span className="technical-text text-[var(--text-tertiary)]">Today</span>
+        <motion.div
+          initial={{ opacity: 0, x: -20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ delay: 0.2, duration: 0.6 }}
+          className="relative p-5 border border-[var(--border)] rounded-2xl hover:border-[var(--border-strong)] transition-all overflow-hidden"
+        >
+          {/* Dot matrix background */}
+          <div className="absolute inset-0 dot-pattern-dense opacity-10" />
+          
+          <div className="relative">
+            <div className="flex items-center gap-2 mb-2">
+              <div className="w-1 h-1 rounded-full bg-[var(--accent)] animate-pulse-slow" />
+              <span className="technical-text text-[var(--text-tertiary)]">Today</span>
+            </div>
+            <p className="text-2xl font-light text-[var(--text-primary)] large-number">
+              {formatCurrency(todayTotal, currency)}
+            </p>
           </div>
-          <p className="text-2xl font-light text-[var(--text-primary)] large-number">
-            {formatCurrency(todayTotal, currency)}
-          </p>
-        </div>
+        </motion.div>
         
         <motion.button
-          whileTap={{ scale: 0.97 }}
+          initial={{ opacity: 0, x: 20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ delay: 0.3, duration: 0.6 }}
+          whileTap={{ scale: 0.95 }}
           onClick={onAddExpense}
-          className="group relative p-5 bg-[var(--text-primary)] text-[var(--bg)] rounded-2xl hover:opacity-90 transition-all flex items-center justify-center gap-2"
+          className="group relative p-5 bg-[var(--text-primary)] text-[var(--bg)] rounded-2xl hover:opacity-90 transition-all flex items-center justify-center gap-2 overflow-hidden"
         >
-          <PlusIcon size={18} />
-          <span className="font-medium text-sm">Add expense</span>
+          {/* Dot matrix background */}
+          <div className="absolute inset-0 dot-pattern-accent opacity-20" />
+          
+          <div className="relative flex items-center gap-2">
+            <PlusIcon size={18} />
+            <span className="font-medium text-sm">Add expense</span>
+          </div>
         </motion.button>
       </div>
 

@@ -83,7 +83,10 @@ export function Memory({ expenses, currency, onEditExpense }: MemoryProps) {
   }
 
   return (
-    <div className="animate-fade-in space-y-12">
+    <div className="animate-fade-in space-y-12 relative">
+      {/* Decorative dot matrix */}
+      <div className="absolute top-0 right-0 w-40 h-40 dot-pattern opacity-15 rounded-full" />
+      
       {memoriesByMonth.map((monthData, monthIndex) => (
         <motion.div
           key={monthData.month}
