@@ -31,14 +31,16 @@ A premium, minimalist, monochrome expense tracker with deep memory features, ins
 - **Scrollable currency picker** — Easy to find any currency
 - **Organized by region** — Logical grouping for easy selection
 
-### 📱 Home Screen Widgets
-- **Widget page** — Dedicated widgets view with spending summaries
-- **Quick add widget** — One-tap expense addition
-- **Monthly total widget** — At-a-glance spending overview
-- **Today's spending widget** — Daily tracking
-- **Recent categories widget** — Quick category access
-- **PWA shortcuts** — Long-press app icon for quick actions
-- **Deep linking** — URL parameters for direct navigation
+### 📱 PWA Features
+- **Installable** — Add to home screen on mobile and desktop
+- **Offline support** — Service worker caches all assets
+- **App shortcuts** — Long-press icon for quick actions:
+  - "Add Expense" — Opens expense form directly
+- **Deep linking** — URL parameters for direct navigation:
+  - `?action=add` — Open add expense modal
+  - `?page=replay` — Go to replay page
+- **Theme color** — Adapts to light/dark mode
+- **Standalone mode** — Runs like a native app
 
 ### 🎭 Visual Enhancements
 - **Dot matrix backgrounds** — Decorative patterns on cards
@@ -72,13 +74,28 @@ A dedicated page that shows your spending memories organized by month. Each memo
 - **Impulse patterns** — Detect patterns like "You marked several late-night purchases as not worth it"
 - **Neutral language** — Never judges, just shows your own data
 
-### 🔄 Spending Replay
-An interactive timeline experience:
-- Choose week, month, or year
-- Scrub through time with a slider
-- Watch cumulative spending animate in real-time
-- See purchase counts change as you move through time
-- Beautiful line visualization with current position indicator
+### 🔄 Financial Replay & Time Machine
+An interactive timeline experience with two modes:
+
+**Replay Mode:**
+- Watch your spending unfold chronologically
+- Play/pause controls with smooth animations
+- See balance changes over time
+- Detect anomalies and velocity changes
+- Jump to specific event types (anomalies, milestones, velocity changes)
+
+**Time Machine Mode:**
+- Travel to any point in your financial history
+- See your balance and spending state at that moment
+- Explore how your finances evolved
+- Perfect for understanding past decisions
+
+Both modes feature:
+- Month-by-month navigation
+- Event-by-event progression
+- Real-time balance updates
+- Anomaly detection markers
+- Beautiful timeline visualization
 
 ### 🔍 Natural Language Search
 Search with natural queries:
@@ -95,6 +112,39 @@ Falls back to regular text search if query can't be parsed.
 - **Pattern detection** — Recurring expenses, category patterns, merchant patterns
 - **Regret patterns** — "You marked 5 food-delivery purchases as not worth it"
 - **Price memory** — Remember what you previously paid for similar items
+
+### 👻 Ghost Money
+See your realistic balance after accounting for upcoming commitments:
+- **Recurring expenses** — Detected from your spending patterns
+- **Predicted spending** — Based on your historical daily average
+- **Transparent calculation** — See exactly what's included
+- **Realistic balance** — Your balance minus ghost money
+- Only shown when there's enough data to make accurate estimates
+
+### 🧬 Spending DNA
+Every transaction has a behavioral profile (accessible via the • button):
+- **Necessity score** — How essential was this purchase?
+- **Impulse score** — How spontaneous was this?
+- **Social score** — Was this for social reasons?
+- **Typicality** — How typical is this for you?
+- **Behavioral signals** — "Late-night purchase", "Recurring pattern", etc.
+- Based on actual historical data, not random values
+
+### 🔍 Anomaly Detection
+The app identifies genuinely unusual spending:
+- **Amount anomalies** — "Your average food purchase is ৳180-350. On Sept 17 you spent ৳1,420"
+- **Frequency anomalies** — "Shopping spending increased 61% this month"
+- **Contextual explanations** — Always explains WHY something was flagged
+- **Non-judgmental** — Shows facts, never says "you shouldn't"
+- Only triggers when there's enough data for meaningful comparison
+
+### 📊 Spending Heatmap
+Visual calendar view of your spending intensity:
+- **Month view** — See spending patterns across the month
+- **Color intensity** — Darker = more spending
+- **Hover details** — See exact amounts for each day
+- **Navigate months** — Browse through your history
+- **GitHub-style** — Familiar, clean visualization
 
 ### 📈 Enhanced Analytics
 - Monthly totals with animated counters
@@ -140,30 +190,33 @@ Falls back to regular text search if query can't be parsed.
 
 ### 📱 Progressive Disclosure
 The app starts simple and reveals features contextually:
-- Overview, Transactions, Memory, Analytics in main navigation
-- Replay and Widgets accessible from navigation
+- Overview, Transactions, Memory, Analytics, Replay in main navigation
 - Memory fields optional in expense form
 - Insights appear only when relevant
 - Patterns detected only with enough data
+- Ghost Money only shown when enough data exists
+- Anomaly detection only triggers with sufficient history
+- Spending DNA accessible via subtle • button on each transaction
+- Getting Started Guide available in Settings for new users
 
-### 📲 PWA Features & Widgets
+### 📲 PWA Features
 - **Installable** — Add to home screen on mobile and desktop
 - **Offline support** — Service worker caches all assets
 - **App shortcuts** — Long-press icon for quick actions:
   - "Add Expense" — Opens expense form directly
-  - "View Widgets" — Jumps to widgets page
-- **Widget views** — Dedicated widget-style layouts:
-  - Monthly spending summary
-  - Today's spending
-  - Quick add button
-  - Recent categories
 - **Deep linking** — URL parameters for direct navigation:
   - `?action=add` — Open add expense modal
-  - `?page=widgets` — Go to widgets page
-  - `?widget=summary` — Show summary widget
-  - `?widget=add` — Show quick add widget
+  - `?page=replay` — Go to replay page
 - **Theme color** — Adapts to light/dark mode
 - **Standalone mode** — Runs like a native app
+
+### 📖 Getting Started Guide
+Built-in onboarding accessible from Settings:
+- **5-step walkthrough** — Learn the basics in minutes
+- **Visual examples** — See what each feature does
+- **Non-intrusive** — Available anytime, doesn't force itself
+- **Explains data requirements** — Why some features need history
+- **Privacy-focused** — Emphasizes local-only data processing
 
 ### 🎯 Core Experience
 **Track → Remember → Reflect → Understand**
@@ -172,13 +225,12 @@ Normal expense tracker: "You spent ৳500."
 What Did I Spend?: "You spent ৳500 on this six months ago. You wrote that it was worth it. You paid ৳300 less than your previous similar purchase."
 
 ### Pages
-- **Overview** — Monthly total with animated counter, contextual insights, month-over-month comparison, mini sparkline, today's spending, recent transactions, smart insights, dot matrix decorations
-- **Transactions** — Full history grouped by date, natural language search, category filter, sort options, tap-to-edit on mobile
+- **Overview** — Monthly total with animated counter, Ghost Money display, anomaly detection, financial trajectory, contextual insights, month-over-month comparison, mini sparkline, today's spending, recent transactions
+- **Transactions** — Full history grouped by date, natural language search, category filter, sort options, Spending DNA for each transaction (tap • to expand), tap-to-edit on mobile
 - **Memory** — Your spending memories organized by month, showing what purchases were for and whether they were worth it
-- **Analytics** — Weekly bar chart, category donut chart, worth-it statistics, impulse patterns, detailed breakdowns
-- **Replay** — Interactive timeline scrubbing through your spending history with animated cumulative totals
-- **Widgets** — Home screen widget-style views showing spending summaries and quick actions
-- **Settings** — Theme (Light/Dark/System), 95+ world currencies, data management, privacy notice
+- **Analytics** — Weekly bar chart, category donut chart, worth-it statistics, impulse patterns, spending heatmap, detailed breakdowns
+- **Replay** — Financial Replay & Time Machine with play/pause controls, event-by-event progression, anomaly markers, month navigation
+- **Settings** — Theme (Light/Dark/System), 95+ world currencies, data management, Getting Started Guide, privacy notice
 
 ### 🌍 Currency Support
 Complete list of 95+ world currencies including:

@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Expense, Currency, DEFAULT_CATEGORIES } from '../lib/types';
 import { formatCurrency, formatSmartDate, formatTime, groupExpensesByDate } from '../lib/utils';
 import { parseNaturalQuery } from '../lib/analytics';
+import { calculateSpendingDNA } from '../lib/advancedAnalytics';
 import { SearchIcon, FilterIcon, CloseIcon, EditIcon, TrashIcon, FoodIcon, TransportIcon, ShoppingIcon, BillsIcon, EntertainmentIcon, HealthIcon, EducationIcon, OtherIcon } from './Icons';
 
 interface TransactionsProps {
@@ -29,6 +30,7 @@ export function Transactions({ expenses, currency, onEdit, onDelete }: Transacti
   const [sortBy, setSortBy] = useState<'newest' | 'oldest' | 'highest' | 'lowest'>('newest');
   const [showFilters, setShowFilters] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
+  const [expandedId, setExpandedId] = useState<string | null>(null);
   const searchRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -219,53 +221,131 @@ export function Transactions({ expenses, currency, onEdit, onDelete }: Transacti
                 {items.map((expense, i) => {
                   const Icon = categoryIcons[expense.category] || OtherIcon;
                   const isConfirming = confirmDelete === expense.id;
+                  const isExpanded = expandedId === expense.id;
+                  const dna = isExpanded ? calculateSpendingDNA(expense, expenses) : null;
                   return (
-                    <motion.div
-                      key={expense.id}
-                      initial={{ opacity: 0, x: -8 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      exit={{ opacity: 0, height: 0 }}
-                      transition={{ delay: i * 0.03, duration: 0.2 }}
-                      onClick={() => onEdit(expense)}
-                      className={`flex items-center gap-4 p-3 rounded-xl transition-all cursor-pointer sm:cursor-default group ${
-                        isConfirming ? 'bg-red-50 dark:bg-red-950/20' : 'hover:bg-[var(--bg-secondary)] active:bg-[var(--bg-tertiary)]'
-                      }`}
-                    >
-                      <div className="w-10 h-10 border border-[var(--border)] rounded-xl flex items-center justify-center group-hover:border-[var(--border-strong)] transition-colors shrink-0">
-                        <Icon size={18} className="text-[var(--text-secondary)]" />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium text-[var(--text-primary)] truncate">
-                          {expense.note || DEFAULT_CATEGORIES.find(c => c.id === expense.category)?.name}
-                        </p>
-                        <p className="text-xs text-[var(--text-tertiary)] mt-0.5">
-                          {DEFAULT_CATEGORIES.find(c => c.id === expense.category)?.name} · {formatTime(expense.createdAt)}
-                        </p>
-                      </div>
-                      <div className="flex items-center gap-3">
-                        <span className="text-sm font-medium text-[var(--text-primary)] large-number">
-                          −{formatCurrency(expense.amount, currency)}
-                        </span>
-                        <div className="flex items-center gap-1 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
-                          <motion.button
-                            whileTap={{ scale: 0.9 }}
-                            onClick={(e) => { e.stopPropagation(); onEdit(expense); }}
-                            className="p-1.5 rounded-full hover:bg-[var(--bg-tertiary)] transition-colors"
-                            aria-label="Edit"
-                          >
-                            <EditIcon size={14} className="text-[var(--text-tertiary)]" />
-                          </motion.button>
-                          <motion.button
-                            whileTap={{ scale: 0.9 }}
-                            onClick={(e) => { e.stopPropagation(); handleDelete(expense.id); }}
-                            className="p-1.5 rounded-full hover:bg-red-100 dark:hover:bg-red-950/30 transition-colors"
-                            aria-label={isConfirming ? 'Confirm delete' : 'Delete'}
-                          >
-                            <TrashIcon size={14} className={isConfirming ? 'text-red-500' : 'text-[var(--text-tertiary)]'} />
-                          </motion.button>
+                    <div key={expense.id}>
+                      <motion.div
+                        initial={{ opacity: 0, x: -8 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        exit={{ opacity: 0, height: 0 }}
+                        transition={{ delay: i * 0.03, duration: 0.2 }}
+                        className={`flex items-center gap-4 p-3 rounded-xl transition-all group ${
+                          isConfirming ? 'bg-red-50 dark:bg-red-950/20' : 'hover:bg-[var(--bg-secondary)] active:bg-[var(--bg-tertiary)]'
+                        }`}
+                      >
+                        <div 
+                          onClick={() => onEdit(expense)}
+                          className="w-10 h-10 border border-[var(--border)] rounded-xl flex items-center justify-center group-hover:border-[var(--border-strong)] transition-colors shrink-0 cursor-pointer"
+                        >
+                          <Icon size={18} className="text-[var(--text-secondary)]" />
                         </div>
-                      </div>
-                    </motion.div>
+                        <div className="flex-1 min-w-0" onClick={() => onEdit(expense)}>
+                          <p className="text-sm font-medium text-[var(--text-primary)] truncate cursor-pointer">
+                            {expense.note || DEFAULT_CATEGORIES.find(c => c.id === expense.category)?.name}
+                          </p>
+                          <p className="text-xs text-[var(--text-tertiary)] mt-0.5">
+                            {DEFAULT_CATEGORIES.find(c => c.id === expense.category)?.name} · {formatTime(expense.createdAt)}
+                          </p>
+                        </div>
+                        <div className="flex items-center gap-3">
+                          <span className="text-sm font-medium text-[var(--text-primary)] large-number">
+                            −{formatCurrency(expense.amount, currency)}
+                          </span>
+                          <div className="flex items-center gap-1">
+                            <motion.button
+                              whileTap={{ scale: 0.9 }}
+                              onClick={(e) => { e.stopPropagation(); setExpandedId(isExpanded ? null : expense.id); }}
+                              className={`p-1.5 rounded-full transition-colors ${
+                                isExpanded ? 'bg-[var(--bg-tertiary)]' : 'hover:bg-[var(--bg-tertiary)] sm:opacity-0 sm:group-hover:opacity-100'
+                              }`}
+                              aria-label="View DNA"
+                            >
+                              <div className="w-3.5 h-3.5 flex items-center justify-center">
+                                <div className="w-1 h-1 rounded-full bg-[var(--text-tertiary)]" />
+                              </div>
+                            </motion.button>
+                            <motion.button
+                              whileTap={{ scale: 0.9 }}
+                              onClick={(e) => { e.stopPropagation(); onEdit(expense); }}
+                              className="p-1.5 rounded-full hover:bg-[var(--bg-tertiary)] transition-colors sm:opacity-0 sm:group-hover:opacity-100"
+                              aria-label="Edit"
+                            >
+                              <EditIcon size={14} className="text-[var(--text-tertiary)]" />
+                            </motion.button>
+                            <motion.button
+                              whileTap={{ scale: 0.9 }}
+                              onClick={(e) => { e.stopPropagation(); handleDelete(expense.id); }}
+                              className="p-1.5 rounded-full hover:bg-red-100 dark:hover:bg-red-950/30 transition-colors sm:opacity-0 sm:group-hover:opacity-100"
+                              aria-label={isConfirming ? 'Confirm delete' : 'Delete'}
+                            >
+                              <TrashIcon size={14} className={isConfirming ? 'text-red-500' : 'text-[var(--text-tertiary)]'} />
+                            </motion.button>
+                          </div>
+                        </div>
+                      </motion.div>
+                      
+                      {/* Spending DNA */}
+                      <AnimatePresence>
+                        {isExpanded && dna && (
+                          <motion.div
+                            initial={{ opacity: 0, height: 0 }}
+                            animate={{ opacity: 1, height: 'auto' }}
+                            exit={{ opacity: 0, height: 0 }}
+                            transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+                            className="overflow-hidden"
+                          >
+                            <div className="ml-14 mr-3 mt-1 mb-2 p-3 bg-[var(--bg-secondary)] rounded-xl border border-[var(--border)]">
+                              <div className="flex items-center gap-2 mb-3">
+                                <div className="w-1 h-1 rounded-full bg-[var(--accent)]" />
+                                <span className="technical-text text-[var(--text-tertiary)]">Spending DNA</span>
+                              </div>
+                              
+                              {/* DNA Bars */}
+                              <div className="space-y-2">
+                                {[
+                                  { label: 'Necessity', value: dna.necessity, color: 'bg-[var(--text-primary)]' },
+                                  { label: 'Impulse', value: dna.impulse, color: 'bg-orange-500' },
+                                  { label: 'Social', value: dna.social, color: 'bg-blue-500' },
+                                ].map((item) => (
+                                  <div key={item.label} className="flex items-center gap-3">
+                                    <span className="text-xs text-[var(--text-tertiary)] w-16">{item.label}</span>
+                                    <div className="flex-1 h-1.5 bg-[var(--bg-tertiary)] rounded-full overflow-hidden">
+                                      <motion.div
+                                        initial={{ width: 0 }}
+                                        animate={{ width: `${item.value}%` }}
+                                        transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+                                        className={`h-full rounded-full ${item.color}`}
+                                      />
+                                    </div>
+                                    <span className="text-xs text-[var(--text-tertiary)] w-8 text-right large-number">{item.value}%</span>
+                                  </div>
+                                ))}
+                              </div>
+                              
+                              {/* Typicality */}
+                              <div className="mt-3 pt-3 border-t border-[var(--border)]">
+                                <div className="flex items-center justify-between">
+                                  <span className="text-xs text-[var(--text-tertiary)]">Typicality</span>
+                                  <span className="text-xs font-medium text-[var(--text-primary)] large-number">{dna.typicality}%</span>
+                                </div>
+                              </div>
+                              
+                              {/* Signals */}
+                              {dna.signals.length > 0 && (
+                                <div className="mt-2 flex flex-wrap gap-1">
+                                  {dna.signals.map((signal, idx) => (
+                                    <span key={idx} className="text-[10px] px-2 py-0.5 bg-[var(--bg-tertiary)] rounded-full text-[var(--text-tertiary)]">
+                                      {signal}
+                                    </span>
+                                  ))}
+                                </div>
+                              )}
+                            </div>
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
+                    </div>
                   );
                 })}
               </div>

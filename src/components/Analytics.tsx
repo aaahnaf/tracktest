@@ -1,11 +1,12 @@
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { motion } from 'framer-motion';
 import { Expense, Currency, DEFAULT_CATEGORIES } from '../lib/types';
 import { formatCurrency, getMonthStart, getMonthEnd, getWeekDates, getInsights } from '../lib/utils';
 import { calculateWorthItStats, detectImpulsePatterns } from '../lib/analytics';
+import { generateHeatmapData } from '../lib/advancedAnalytics';
 import { AnimatedNumber } from './AnimatedNumber';
 import { FoodIcon, TransportIcon, ShoppingIcon, BillsIcon, EntertainmentIcon, HealthIcon, EducationIcon, OtherIcon } from './Icons';
-import { parseISO, format } from 'date-fns';
+import { parseISO, format, subMonths, eachDayOfInterval, startOfMonth } from 'date-fns';
 
 interface AnalyticsProps {
   expenses: Expense[];
@@ -82,6 +83,16 @@ export function Analytics({ expenses, currency }: AnalyticsProps) {
   // Worth-it analytics
   const worthItStats = useMemo(() => calculateWorthItStats(expenses), [expenses]);
   const impulsePatterns = useMemo(() => detectImpulsePatterns(expenses), [expenses]);
+  
+  // Heatmap
+  const [heatmapMonth, setHeatmapMonth] = useState(new Date());
+  const heatmapData = useMemo(() => {
+    const start = startOfMonth(heatmapMonth);
+    const end = getMonthEnd(heatmapMonth);
+    const data = generateHeatmapData(expenses, start, end);
+    const maxAmount = Math.max(...data.map(d => d.amount), 1);
+    return data.map(d => ({ ...d, intensity: d.amount / maxAmount }));
+  }, [expenses, heatmapMonth]);
 
   const symbol = currency === 'BDT' ? '৳' : currency === 'USD' ? '$' : currency === 'EUR' ? '€' : currency === 'GBP' ? '£' : '₹';
 
@@ -344,6 +355,81 @@ export function Analytics({ expenses, currency }: AnalyticsProps) {
           </div>
         </div>
       )}
+
+      {/* Spending Heatmap */}
+      <div>
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center gap-2">
+            <div className="w-1.5 h-1.5 rounded-full bg-[var(--text-primary)]" />
+            <h3 className="technical-text text-[var(--text-secondary)]">Spending Heatmap</h3>
+          </div>
+          <button
+            onClick={() => setHeatmapMonth(subMonths(heatmapMonth, 1))}
+            className="text-xs text-[var(--text-tertiary)] hover:text-[var(--text-primary)] transition-colors"
+          >
+            ← {format(subMonths(heatmapMonth, 1), 'MMM')}
+          </button>
+        </div>
+        
+        <div className="p-4 border border-[var(--border)] rounded-2xl">
+          <p className="text-xs text-[var(--text-tertiary)] mb-3 technical-text">
+            {format(heatmapMonth, 'MMMM yyyy')}
+          </p>
+          
+          {/* Heatmap Grid */}
+          <div className="grid grid-cols-7 gap-1">
+            {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map((day, i) => (
+              <div key={i} className="text-center text-[10px] text-[var(--text-tertiary)] py-1">
+                {day}
+              </div>
+            ))}
+            {heatmapData.map((day, i) => {
+              const dayNum = parseISO(day.date).getDate();
+              const opacity = day.intensity;
+              return (
+                <motion.div
+                  key={day.date}
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ delay: i * 0.01 }}
+                  className="aspect-square rounded-sm flex items-center justify-center text-[10px] relative group cursor-default"
+                  style={{
+                    backgroundColor: day.amount > 0 ? `var(--accent)` : 'var(--bg-tertiary)',
+                    opacity: day.amount > 0 ? 0.3 + opacity * 0.7 : 0.3,
+                    color: day.amount > 0 ? 'var(--bg)' : 'var(--text-tertiary)'
+                  }}
+                  title={`${format(parseISO(day.date), 'MMM d')}: ${formatCurrency(day.amount, currency)}`}
+                >
+                  {dayNum}
+                  {day.amount > 0 && (
+                    <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 px-2 py-1 bg-[var(--text-primary)] text-[var(--bg)] text-[10px] rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-10">
+                      {formatCurrency(day.amount, currency)}
+                    </div>
+                  )}
+                </motion.div>
+              );
+            })}
+          </div>
+          
+          {/* Legend */}
+          <div className="mt-4 flex items-center justify-between text-[10px] text-[var(--text-tertiary)]">
+            <span>Less</span>
+            <div className="flex gap-1">
+              {[0, 0.25, 0.5, 0.75, 1].map((intensity, i) => (
+                <div
+                  key={i}
+                  className="w-3 h-3 rounded-sm"
+                  style={{
+                    backgroundColor: intensity === 0 ? 'var(--bg-tertiary)' : 'var(--accent)',
+                    opacity: intensity === 0 ? 0.3 : 0.3 + intensity * 0.7
+                  }}
+                />
+              ))}
+            </div>
+            <span>More</span>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

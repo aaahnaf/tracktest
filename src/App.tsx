@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { GridIcon, ListIcon, ChartIcon, SettingsIcon, PlusIcon, HeartIcon, DotIcon } from './components/Icons';
+import { GridIcon, ListIcon, ChartIcon, SettingsIcon, PlusIcon, HeartIcon } from './components/Icons';
 import { useExpenses } from './hooks/useExpenses';
 import { useSettings } from './hooks/useSettings';
 import { useTheme } from './hooks/useTheme';
@@ -10,7 +10,6 @@ import { Transactions } from './components/Transactions';
 import { Memory } from './components/Memory';
 import { Analytics } from './components/Analytics';
 import { Replay } from './components/Replay';
-import { Widgets } from './components/Widgets';
 import { Settings } from './components/Settings';
 import { AddExpenseModal } from './components/AddExpenseModal';
 
@@ -20,7 +19,6 @@ const NAV_ITEMS: { id: Page; label: string; icon: any }[] = [
   { id: 'memory', label: 'Memory', icon: HeartIcon },
   { id: 'analytics', label: 'Analytics', icon: ChartIcon },
   { id: 'replay', label: 'Replay', icon: ChartIcon },
-  { id: 'widgets', label: 'Widgets', icon: DotIcon },
   { id: 'settings', label: 'Settings', icon: SettingsIcon },
 ];
 
@@ -33,22 +31,16 @@ export default function App() {
   const { settings, updateSettings } = useSettings();
   const resolvedTheme = useTheme(settings.theme);
 
-  // Handle URL parameters for shortcuts and widgets
+  // Handle URL parameters for shortcuts
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const action = params.get('action');
     const pageParam = params.get('page');
-    const widget = params.get('widget');
 
     if (action === 'add') {
       setShowAddModal(true);
-    } else if (pageParam && ['overview', 'transactions', 'memory', 'analytics', 'replay', 'widgets', 'settings'].includes(pageParam)) {
+    } else if (pageParam && ['overview', 'transactions', 'memory', 'analytics', 'replay', 'settings'].includes(pageParam)) {
       setPage(pageParam as Page);
-    } else if (widget === 'summary' || widget === 'add') {
-      setPage('widgets');
-      if (widget === 'add') {
-        setTimeout(() => setShowAddModal(true), 300);
-      }
     }
   }, []);
 
@@ -218,13 +210,6 @@ export default function App() {
                     currency={settings.currency}
                   />
                 )}
-                {page === 'widgets' && (
-                  <Widgets
-                    expenses={expenses}
-                    currency={settings.currency}
-                    onAddExpense={() => setShowAddModal(true)}
-                  />
-                )}
                 {page === 'settings' && (
                   <Settings
                     settings={settings}
@@ -285,18 +270,6 @@ export default function App() {
           >
             <HeartIcon size={20} />
             <span className="text-[10px] font-medium">Memory</span>
-          </motion.button>
-
-          {/* Widgets */}
-          <motion.button
-            whileTap={{ scale: 0.9 }}
-            onClick={() => setPage('widgets')}
-            className={`flex flex-col items-center gap-1 px-3 py-2 rounded-xl transition-all min-w-[60px] ${
-              page === 'widgets' ? 'text-[var(--text-primary)]' : 'text-[var(--text-tertiary)]'
-            }`}
-          >
-            <DotIcon size={20} />
-            <span className="text-[10px] font-medium">Widgets</span>
           </motion.button>
         </div>
       </nav>

@@ -27,32 +27,6 @@
           "sizes": "any"
         }
       ]
-    },
-    {
-      "name": "View Widgets",
-      "short_name": "Widgets",
-      "description": "View spending widgets",
-      "url": "/?page=widgets",
-      "icons": [
-        {
-          "src": "/icon.svg",
-          "sizes": "any"
-        }
-      ]
-    }
-  ],
-  "widgets": [
-    {
-      "name": "Spending Summary",
-      "description": "View your monthly spending at a glance",
-      "tag": "spending-summary",
-      "target": "/?widget=summary"
-    },
-    {
-      "name": "Quick Add",
-      "description": "Quickly add a new expense",
-      "tag": "quick-add",
-      "target": "/?widget=add"
     }
   ]
 }

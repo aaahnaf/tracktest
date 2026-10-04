@@ -56,7 +56,7 @@ export type Currency =
   | 'ILS' | 'IRR' | 'IQD' | 'LBP' | 'SYP' | 'YER' | 'AFN' | 'KZT' | 'UZS' | 'TJS'
   | 'MNT' | 'ISK' | 'BAM' | 'MKD' | 'ALL' | 'AMD' | 'AZN' | 'MDL' | 'KGS' | 'TMT';
 
-export type Page = 'overview' | 'transactions' | 'memory' | 'analytics' | 'replay' | 'settings' | 'widgets';
+export type Page = 'overview' | 'transactions' | 'memory' | 'analytics' | 'replay' | 'settings';
 
 export interface Settings {
   theme: Theme;

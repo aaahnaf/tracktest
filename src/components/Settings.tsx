@@ -1,7 +1,7 @@
 import { useState, useRef } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Settings as SettingsType, Theme, Currency } from '../lib/types';
-import { DownloadIcon, UploadIcon, TrashIcon, ShieldIcon } from './Icons';
+import { DownloadIcon, UploadIcon, TrashIcon, ShieldIcon, PlusIcon, CloseIcon } from './Icons';
 import { exportData, importData, deleteAllExpenses } from '../lib/db';
 import { CURRENCIES } from '../lib/currencies';
 
@@ -14,6 +14,7 @@ interface SettingsProps {
 export function Settings({ settings, onUpdateSettings, onDeleteAll }: SettingsProps) {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [importStatus, setImportStatus] = useState<'idle' | 'success' | 'error'>('idle');
+  const [showGuide, setShowGuide] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
 
   const handleExport = async () => {
@@ -61,6 +62,24 @@ export function Settings({ settings, onUpdateSettings, onDeleteAll }: SettingsPr
 
   return (
     <div className="animate-fade-in space-y-10 max-w-lg">
+      {/* Getting Started Guide */}
+      <div>
+        <motion.button
+          whileTap={{ scale: 0.98 }}
+          onClick={() => setShowGuide(true)}
+          className="w-full flex items-center gap-4 p-5 border border-[var(--accent)] rounded-2xl hover:bg-[var(--bg-secondary)] transition-colors text-left"
+        >
+          <div className="w-10 h-10 rounded-xl bg-[var(--accent)] flex items-center justify-center shrink-0">
+            <span className="text-[var(--bg)] text-lg">?</span>
+          </div>
+          <div className="flex-1">
+            <p className="text-sm font-medium text-[var(--text-primary)]">Getting Started</p>
+            <p className="text-xs text-[var(--text-tertiary)] mt-0.5">Learn how to use the app</p>
+          </div>
+          <span className="text-[var(--text-tertiary)]">→</span>
+        </motion.button>
+      </div>
+
       {/* Appearance */}
       <div>
         <div className="flex items-center gap-2 mb-5">
@@ -195,6 +214,124 @@ export function Settings({ settings, onUpdateSettings, onDeleteAll }: SettingsPr
           Your data stays on this device. No accounts, no servers, no tracking.
         </p>
       </div>
+
+      {/* Getting Started Modal */}
+      <AnimatePresence>
+        {showGuide && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.3 }}
+            className="fixed inset-0 z-50 flex items-center justify-center p-4"
+          >
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setShowGuide(false)}
+              className="absolute inset-0 bg-black/60 backdrop-blur-md"
+            />
+            <motion.div
+              initial={{ opacity: 0, y: 50, scale: 0.95 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: 30, scale: 0.97 }}
+              transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+              className="relative w-full max-w-lg bg-[var(--bg)] rounded-3xl border border-[var(--border-strong)] max-h-[85vh] overflow-y-auto"
+            >
+              {/* Header */}
+              <div className="sticky top-0 bg-[var(--bg)] border-b border-[var(--border)] px-6 py-4 flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <div className="w-1.5 h-1.5 rounded-full bg-[var(--accent)]" />
+                  <h2 className="technical-text text-[var(--text-secondary)]">Getting Started</h2>
+                </div>
+                <motion.button
+                  whileTap={{ scale: 0.9 }}
+                  onClick={() => setShowGuide(false)}
+                  className="p-2 -mr-2 rounded-full hover:bg-[var(--bg-secondary)] transition-colors"
+                >
+                  <CloseIcon size={16} className="text-[var(--text-secondary)]" />
+                </motion.button>
+              </div>
+
+              <div className="p-6 space-y-6">
+                {/* Intro */}
+                <div>
+                  <h3 className="text-lg font-light text-[var(--text-primary)] mb-2">Welcome</h3>
+                  <p className="text-sm text-[var(--text-secondary)] leading-relaxed">
+                    This app helps you track spending and understand your financial patterns. Here's how to get started.
+                  </p>
+                </div>
+
+                {/* Steps */}
+                <div className="space-y-4">
+                  {[
+                    {
+                      num: '01',
+                      title: 'Add your first expense',
+                      desc: 'Tap the + button. Enter the amount, pick a category, and save. That\'s it.'
+                    },
+                    {
+                      num: '02',
+                      title: 'Check your overview',
+                      desc: 'The home screen shows your monthly spending at a glance. As you add more expenses, you\'ll see trends and insights.'
+                    },
+                    {
+                      num: '03',
+                      title: 'Add memories (optional)',
+                      desc: 'When editing an expense, you can add "What was this for?" and rate if it was worth it. These become your spending memories.'
+                    },
+                    {
+                      num: '04',
+                      title: 'Explore deeper',
+                      desc: 'As your history grows, features like Financial Replay, anomaly detection, and spending DNA become available.'
+                    },
+                    {
+                      num: '05',
+                      title: 'Use natural search',
+                      desc: 'Try asking questions like "How much did I spend on food last month?" in the Transactions page.'
+                    }
+                  ].map((step, i) => (
+                    <motion.div
+                      key={i}
+                      initial={{ opacity: 0, x: -10 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: i * 0.08 }}
+                      className="flex gap-4 p-4 border border-[var(--border)] rounded-xl"
+                    >
+                      <span className="technical-text text-[var(--accent)] shrink-0">{step.num}</span>
+                      <div>
+                        <p className="text-sm font-medium text-[var(--text-primary)]">{step.title}</p>
+                        <p className="text-xs text-[var(--text-secondary)] mt-1 leading-relaxed">{step.desc}</p>
+                      </div>
+                    </motion.div>
+                  ))}
+                </div>
+
+                {/* Note about data */}
+                <div className="p-4 border border-dashed border-[var(--border-strong)] rounded-xl">
+                  <div className="flex items-center gap-2 mb-2">
+                    <div className="w-1.5 h-1.5 rounded-full bg-[var(--text-tertiary)]" />
+                    <span className="technical-text text-[var(--text-tertiary)]">About insights</span>
+                  </div>
+                  <p className="text-xs text-[var(--text-secondary)] leading-relaxed">
+                    Advanced features like anomaly detection, spending DNA, and financial replay need some history to work. Keep adding expenses and these will gradually become available. All processing happens on your device — nothing is sent anywhere.
+                  </p>
+                </div>
+
+                {/* Close button */}
+                <motion.button
+                  whileTap={{ scale: 0.97 }}
+                  onClick={() => setShowGuide(false)}
+                  className="w-full py-3 bg-[var(--text-primary)] text-[var(--bg)] rounded-full font-medium text-sm hover:opacity-90 transition-opacity"
+                >
+                  Got it
+                </motion.button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
