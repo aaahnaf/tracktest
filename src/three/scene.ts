@@ -15,10 +15,12 @@ type SceneEvents = {
   burst: (x: number, y: number, kind: BurstType) => void;
 };
 
+type AnyHandler = (...args: any[]) => void;
+
 class SceneBus {
   private el = new EventTarget();
-  on<K extends keyof SceneEvents>(e: K, fn: SceneEvents[K]) {
-    const h = ((ev: any) => fn(ev.detail)) as EventListener;
+  on(e: string, fn: AnyHandler) {
+    const h = ((ev: Event) => fn(...((ev as CustomEvent).detail ?? []))) as EventListener;
     this.el.addEventListener(e, h);
     return () => this.el.removeEventListener(e, h);
   }

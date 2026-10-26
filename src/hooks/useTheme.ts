@@ -1,8 +1,35 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { Theme } from '../lib/types';
 
-export function useTheme(theme: Theme) {
+const THEME_KEY = 'wdis-theme';
+
+function readStoredTheme(): Theme {
+  try {
+    const t = localStorage.getItem(THEME_KEY);
+    if (t === 'light' || t === 'dark' || t === 'system') return t;
+  } catch {
+    /* noop */
+  }
+  return 'system';
+}
+
+/**
+ * Owns the user's theme preference ('light' | 'dark' | 'system'), persists it
+ * to localStorage, applies the resolved theme to <html>, and returns
+ * { theme, setTheme, resolvedTheme }.
+ */
+export function useTheme() {
+  const [theme, setThemeState] = useState<Theme>(readStoredTheme);
   const [resolved, setResolved] = useState<'light' | 'dark'>('light');
+
+  const setTheme = useCallback((t: Theme) => {
+    setThemeState(t);
+    try {
+      localStorage.setItem(THEME_KEY, t);
+    } catch {
+      /* noop */
+    }
+  }, []);
 
   useEffect(() => {
     const mq = window.matchMedia('(prefers-color-scheme: dark)');
@@ -23,7 +50,9 @@ export function useTheme(theme: Theme) {
   useEffect(() => {
     document.documentElement.classList.toggle('dark', resolved === 'dark');
     document.documentElement.style.colorScheme = resolved;
+    // let the Three.js world know which palette to render in
+    window.dispatchEvent(new CustomEvent('wdis:theme', { detail: resolved }));
   }, [resolved]);
 
-  return resolved;
+  return { theme, setTheme, resolvedTheme: resolved };
 }
