@@ -229,7 +229,7 @@ export default function App() {
             )}
             {activeTab === 'settings' && (
               <Settings
-                settings={{ theme, currency }}
+                settings={{ theme, currency, defaultCategory: 'food' }}
                 onUpdateSettings={(s) => {
                   if (s.theme) setTheme(s.theme);
                   if (s.currency) setCurrency(s.currency);
