@@ -1,283 +1,327 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { GridIcon, ListIcon, ChartIcon, SettingsIcon, PlusIcon, HeartIcon } from './components/Icons';
+import './index.css';
+import './three/scene'; // boot the Three.js world (side-effect module)
 import { useExpenses } from './hooks/useExpenses';
-import { useSettings } from './hooks/useSettings';
 import { useTheme } from './hooks/useTheme';
-import { Page, Expense } from './lib/types';
+import { Expense, Currency, CURRENCY_SYMBOLS } from './lib/types';
 import { Overview } from './components/Overview';
 import { Transactions } from './components/Transactions';
-import { Memory } from './components/Memory';
 import { Analytics } from './components/Analytics';
+import { Memory } from './components/Memory';
 import { Replay } from './components/Replay';
 import { Settings } from './components/Settings';
 import { AddExpenseModal } from './components/AddExpenseModal';
+import { GlassPill, Magnetic, useSpotlight } from './components/GlassUI';
+import { burstFromElement, burstAt } from './three/scene';
+import { haptic } from './lib/haptic';
 
-const NAV_ITEMS: { id: Page; label: string; icon: any }[] = [
-  { id: 'overview', label: 'Overview', icon: GridIcon },
-  { id: 'transactions', label: 'Transactions', icon: ListIcon },
-  { id: 'memory', label: 'Memory', icon: HeartIcon },
-  { id: 'analytics', label: 'Analytics', icon: ChartIcon },
-  { id: 'replay', label: 'Replay', icon: ChartIcon },
-  { id: 'settings', label: 'Settings', icon: SettingsIcon },
-];
+type Tab = 'overview' | 'transactions' | 'analytics' | 'memory' | 'replay' | 'settings';
+
+const TAB_LABELS: Record<Tab, string> = {
+  overview: 'Overview',
+  transactions: 'Transactions',
+  analytics: 'Analytics',
+  memory: 'Memory',
+  replay: 'Replay',
+  settings: 'Settings',
+};
 
 export default function App() {
-  const [page, setPage] = useState<Page>('overview');
+  const [activeTab, setActiveTab] = useState<Tab>('overview');
   const [showAddModal, setShowAddModal] = useState(false);
   const [editExpense, setEditExpense] = useState<Expense | null>(null);
-  
   const { expenses, loading, addExpense, updateExpense, deleteExpense, deleteAll } = useExpenses();
-  const { settings, updateSettings } = useSettings();
-  const resolvedTheme = useTheme(settings.theme);
+  const { theme, setTheme, resolvedTheme } = useTheme();
+  const [currency, setCurrency] = useState<Currency>(() => {
+    try {
+      return (localStorage.getItem('wdis-currency') as Currency) || 'BDT';
+    } catch {
+      return 'BDT';
+    }
+  });
 
-  // Keyboard shortcuts
+  useSpotlight();
+
+  // announce page to the 3D scene + fire a nav burst
   useEffect(() => {
-    const handleKey = (e: KeyboardEvent) => {
-      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
-      if (e.key === 'n' || e.key === 'N') {
-        e.preventDefault();
-        setShowAddModal(true);
-      }
-    };
-    document.addEventListener('keydown', handleKey);
-    return () => document.removeEventListener('keydown', handleKey);
-  }, []);
+    window.dispatchEvent(new CustomEvent('wdis:page', { detail: activeTab }));
+    burstAt(0, 0.92, 'nav');
+  }, [activeTab]);
 
-  const handleEdit = useCallback((expense: Expense) => {
+  // persist currency
+  useEffect(() => {
+    try {
+      localStorage.setItem('wdis-currency', currency);
+    } catch {
+      /* noop */
+    }
+  }, [currency]);
+
+  const handleSaveExpense = async (expense: Expense) => {
+    await addExpense(expense);
+    burstAt(0, -0.1, 'success');
+  };
+
+  const handleUpdateExpense = async (expense: Expense) => {
+    await updateExpense(expense);
+  };
+
+  const handleDeleteExpense = async (id: string) => {
+    await deleteExpense(id);
+  };
+
+  const handleDeleteAll = async () => {
+    await deleteAll();
+  };
+
+  const openEdit = (expense: Expense) => {
     setEditExpense(expense);
     setShowAddModal(true);
-  }, []);
+  };
 
-  const handleCloseModal = useCallback(() => {
-    setShowAddModal(false);
+  const openAdd = (e?: React.MouseEvent) => {
     setEditExpense(null);
-  }, []);
+    setShowAddModal(true);
+    haptic('medium');
+    if (e) burstFromElement(e.currentTarget as Element, 'nav');
+  };
+
+  const cycleTheme = () => {
+    const order: (typeof theme)[] = ['light', 'dark', 'system'];
+    const next = order[(order.indexOf(theme) + 1) % order.length];
+    setTheme(next);
+    haptic('light');
+  };
 
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[var(--bg)]">
-        <div className="relative">
-          <div className="w-16 h-16 border border-[var(--border)] rounded-full flex items-center justify-center">
-            <div className="w-2 h-2 rounded-full bg-[var(--accent)] animate-pulse-slow" />
+        <motion.div
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="flex flex-col items-center gap-6"
+        >
+          <div className="relative w-16 h-16">
+            <motion.div
+              className="absolute inset-0 rounded-full border border-[var(--border-strong)]"
+              animate={{ rotate: 360 }}
+              transition={{ duration: 3, repeat: Infinity, ease: 'linear' }}
+            />
+            <motion.div
+              className="absolute inset-3 rounded-full border border-[var(--border)]"
+              animate={{ rotate: -360 }}
+              transition={{ duration: 5, repeat: Infinity, ease: 'linear' }}
+            />
+            <div className="absolute inset-0 flex items-center justify-center">
+              <div className="w-2 h-2 rounded-full bg-[var(--accent)] animate-pulse-slow" />
+            </div>
           </div>
-        </div>
+          <p className="technical-text text-[var(--text-tertiary)]">Loading your story…</p>
+        </motion.div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-[var(--bg)] transition-colors duration-300">
-      <div className="flex">
-        {/* Desktop Sidebar */}
-        <aside className="hidden md:flex flex-col w-64 h-screen sticky top-0 border-r border-[var(--border)] bg-[var(--bg)] px-5 py-6">
-          {/* Logo */}
-          <div className="mb-10 px-2">
-            <h1 className="text-lg font-light text-[var(--text-primary)] tracking-tight">What Did I Spend?</h1>
-            <div className="flex items-center gap-2 mt-1">
-              <div className="w-1.5 h-1.5 rounded-full bg-[var(--accent)]" />
-              <p className="text-[10px] text-[var(--text-tertiary)] technical-text">Track your spending</p>
-            </div>
-          </div>
+    <div className="min-h-screen relative">
+      {/* ambient layers driven by CSS vars / three.js */}
+      <div className="spotlight-layer" aria-hidden />
+      <div className="grain-layer" aria-hidden />
 
-          {/* Nav */}
-          <nav className="flex-1 space-y-1">
-            {NAV_ITEMS.map(item => {
-              const Icon = item.icon;
-              const isActive = page === item.id;
-              return (
-                <motion.button
-                  key={item.id}
-                  whileTap={{ scale: 0.98 }}
-                  onClick={() => setPage(item.id)}
-                  className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200 ${
-                    isActive
-                      ? 'bg-[var(--bg-secondary)] text-[var(--text-primary)]'
-                      : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-secondary)]/60'
-                  }`}
-                >
-                  <Icon size={18} className={isActive ? 'text-[var(--text-primary)]' : 'text-[var(--text-tertiary)]'} />
-                  <span>{item.label}</span>
-                  {isActive && (
-                    <motion.div
-                      layoutId="activeIndicator"
-                      className="ml-auto w-1.5 h-1.5 rounded-full bg-[var(--accent)]"
-                    />
-                  )}
-                </motion.button>
-              );
-            })}
-          </nav>
+      {/* Header — liquid glass bar */}
+      <header className="sticky top-0 z-40 px-4 pt-4 pointer-events-none">
+        <div className="max-w-4xl mx-auto pointer-events-auto">
+          <div className="glass-card !rounded-full px-4 sm:px-6 py-3 flex items-center justify-between gap-3">
+            <button
+              onClick={() => setActiveTab('overview')}
+              className="flex items-center gap-2.5 group"
+              aria-label="Go to overview"
+            >
+              <span className="w-2 h-2 rounded-full bg-[var(--accent)] accent-glow group-hover:scale-125 transition-transform" />
+              <span className="text-sm font-medium tracking-tight text-[var(--text-primary)]">
+                What Did I Spend?
+              </span>
+            </button>
 
-          {/* Add button */}
-          <motion.button
-            whileTap={{ scale: 0.97 }}
-            onClick={() => setShowAddModal(true)}
-            className="flex items-center justify-center gap-2 w-full py-3.5 mt-6 bg-[var(--text-primary)] text-[var(--bg)] rounded-full font-medium text-sm hover:opacity-90 transition-all"
-          >
-            <PlusIcon size={16} />
-            <span>Add expense</span>
-          </motion.button>
-
-          {/* Privacy note */}
-          <div className="mt-6 flex items-center gap-2 px-2">
-            <div className="w-1.5 h-1.5 rounded-full bg-[var(--accent)]" />
-            <p className="technical-text text-[var(--text-tertiary)]">
-              Data stored locally
-            </p>
-          </div>
-        </aside>
-
-        {/* Main Content */}
-        <main className="flex-1 min-h-screen">
-          <div className="max-w-2xl mx-auto px-5 sm:px-8 pt-8 pb-28 md:pb-8">
-            {/* Page Header (mobile) */}
-            <div className="md:hidden mb-8 flex items-center justify-between">
-              <div>
-                <h1 className="text-xl font-light text-[var(--text-primary)] tracking-tight">
-                  {NAV_ITEMS.find(n => n.id === page)?.label}
-                </h1>
+            <div className="flex items-center gap-2">
+              {/* Currency selector — glass pills */}
+              <div className="hidden sm:flex items-center gap-1.5">
+                {(Object.keys(CURRENCY_SYMBOLS) as Currency[]).map((c) => (
+                  <Magnetic key={c} strength={0.25}>
+                    <GlassPill
+                      active={currency === c}
+                      onClick={() => {
+                        setCurrency(c);
+                        haptic('light');
+                      }}
+                      className="!px-2.5 !py-1.5"
+                      aria-label={`Switch currency to ${c}`}
+                    >
+                      {CURRENCY_SYMBOLS[c]}
+                    </GlassPill>
+                  </Magnetic>
+                ))}
               </div>
-              {page !== 'settings' && (
-                <motion.button
-                  whileTap={{ scale: 0.9 }}
-                  onClick={() => setPage('settings')}
-                  className="p-2 -mr-2 rounded-full text-[var(--text-tertiary)] hover:text-[var(--text-primary)] transition-colors"
-                  aria-label="Settings"
+
+              {/* Theme toggle */}
+              <Magnetic strength={0.3}>
+                <button
+                  onClick={cycleTheme}
+                  className="glass-pill !px-3 !py-1.5 flex items-center gap-1.5"
+                  aria-label={`Theme: ${theme}`}
                 >
-                  <SettingsIcon size={18} />
-                </motion.button>
-              )}
+                  <AnimatePresence mode="wait" initial={false}>
+                    <motion.span
+                      key={resolvedTheme}
+                      initial={{ y: 8, opacity: 0, rotate: -30 }}
+                      animate={{ y: 0, opacity: 1, rotate: 0 }}
+                      exit={{ y: -8, opacity: 0, rotate: 30 }}
+                      transition={{ duration: 0.25 }}
+                      className="text-xs"
+                    >
+                      {resolvedTheme === 'dark' ? '◐' : '◑'}
+                    </motion.span>
+                  </AnimatePresence>
+                  <span className="technical-text hidden md:inline">{theme}</span>
+                </button>
+              </Magnetic>
             </div>
-
-            {/* Page Content */}
-            <AnimatePresence mode="wait">
-              <motion.div
-                key={page}
-                initial={{ opacity: 0, y: 8 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -6 }}
-                transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
-              >
-                {page === 'overview' && (
-                  <Overview
-                    expenses={expenses}
-                    currency={settings.currency}
-                    onAddExpense={() => setShowAddModal(true)}
-                    onNavigate={setPage}
-                  />
-                )}
-                {page === 'transactions' && (
-                  <Transactions
-                    expenses={expenses}
-                    currency={settings.currency}
-                    onEdit={handleEdit}
-                    onDelete={deleteExpense}
-                  />
-                )}
-                {page === 'memory' && (
-                  <Memory
-                    expenses={expenses}
-                    currency={settings.currency}
-                    onEditExpense={handleEdit}
-                  />
-                )}
-                {page === 'analytics' && (
-                  <Analytics
-                    expenses={expenses}
-                    currency={settings.currency}
-                  />
-                )}
-                {page === 'replay' && (
-                  <Replay
-                    expenses={expenses}
-                    currency={settings.currency}
-                  />
-                )}
-                {page === 'settings' && (
-                  <Settings
-                    settings={settings}
-                    onUpdateSettings={updateSettings}
-                    onDeleteAll={deleteAll}
-                  />
-                )}
-              </motion.div>
-            </AnimatePresence>
           </div>
-        </main>
-      </div>
+        </div>
+      </header>
 
-      {/* Mobile Bottom Navigation */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-[var(--bg)]/95 backdrop-blur-xl border-t border-[var(--border)] safe-bottom z-40">
-        <div className="flex items-center justify-around px-1 pt-2 pb-1">
-          {/* Overview */}
-          <motion.button
-            whileTap={{ scale: 0.9 }}
-            onClick={() => setPage('overview')}
-            className={`flex flex-col items-center gap-1 px-3 py-2 rounded-xl transition-all min-w-[60px] ${
-              page === 'overview' ? 'text-[var(--text-primary)]' : 'text-[var(--text-tertiary)]'
-            }`}
+      {/* Main content with cinematic page transitions */}
+      <main className="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 pb-36 pt-8">
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={activeTab}
+            initial={{ opacity: 0, y: 34, scale: 0.985, filter: 'blur(10px)' }}
+            animate={{ opacity: 1, y: 0, scale: 1, filter: 'blur(0px)' }}
+            exit={{ opacity: 0, y: -22, scale: 0.99, filter: 'blur(8px)' }}
+            transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
           >
-            <GridIcon size={20} />
-            <span className="text-[10px] font-medium">Overview</span>
-          </motion.button>
+            {activeTab === 'overview' && (
+              <Overview
+                expenses={expenses}
+                currency={currency}
+                onAddExpense={() => openAdd()}
+                onViewAll={() => setActiveTab('transactions')}
+                onViewAnalytics={() => setActiveTab('analytics')}
+              />
+            )}
+            {activeTab === 'transactions' && (
+              <Transactions
+                expenses={expenses}
+                currency={currency}
+                onEdit={openEdit}
+                onDelete={handleDeleteExpense}
+              />
+            )}
+            {activeTab === 'analytics' && (
+              <Analytics expenses={expenses} currency={currency} />
+            )}
+            {activeTab === 'memory' && (
+              <Memory expenses={expenses} currency={currency} onEditExpense={openEdit} />
+            )}
+            {activeTab === 'replay' && (
+              <Replay expenses={expenses} currency={currency} />
+            )}
+            {activeTab === 'settings' && (
+              <Settings
+                settings={{ theme, currency }}
+                onUpdateSettings={(s) => {
+                  if (s.theme) setTheme(s.theme);
+                  if (s.currency) setCurrency(s.currency);
+                }}
+                onDeleteAll={handleDeleteAll}
+              />
+            )}
+          </motion.div>
+        </AnimatePresence>
+      </main>
 
-          {/* Transactions */}
+      {/* Floating action button — liquid glass orb */}
+      <div className="fixed bottom-24 right-5 sm:right-8 z-40">
+        <Magnetic strength={0.4}>
           <motion.button
+            whileHover={{ scale: 1.08, rotate: 90 }}
             whileTap={{ scale: 0.9 }}
-            onClick={() => setPage('transactions')}
-            className={`flex flex-col items-center gap-1 px-3 py-2 rounded-xl transition-all min-w-[60px] ${
-              page === 'transactions' ? 'text-[var(--text-primary)]' : 'text-[var(--text-tertiary)]'
-            }`}
-          >
-            <ListIcon size={20} />
-            <span className="text-[10px] font-medium">Transactions</span>
-          </motion.button>
-
-          {/* Center Add Button */}
-          <motion.button
-            whileTap={{ scale: 0.9 }}
-            onClick={() => setShowAddModal(true)}
-            className="flex items-center justify-center w-12 h-12 -mt-5 bg-[var(--text-primary)] text-[var(--bg)] rounded-full shadow-lg active:scale-90 transition-transform"
+            onClick={openAdd}
+            className="relative w-14 h-14 rounded-full flex items-center justify-center text-[var(--text-primary)] shadow-xl cursor-pointer"
+            style={{
+              background: 'var(--glass-bg-strong)',
+              backdropFilter: 'blur(20px) saturate(170%)',
+              WebkitBackdropFilter: 'blur(20px) saturate(170%)',
+              border: '1px solid var(--glass-border)',
+            }}
             aria-label="Add expense"
           >
-            <PlusIcon size={22} />
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+              <line x1="12" y1="5" x2="12" y2="19" />
+              <line x1="5" y1="12" x2="19" y2="12" />
+            </svg>
+            <span
+              className="absolute inset-0 rounded-full pointer-events-none"
+              style={{ boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.7), inset 0 -6px 14px rgba(0,0,0,0.06)' }}
+            />
           </motion.button>
+        </Magnetic>
+      </div>
 
-          {/* Memory */}
-          <motion.button
-            whileTap={{ scale: 0.9 }}
-            onClick={() => setPage('memory')}
-            className={`flex flex-col items-center gap-1 px-3 py-2 rounded-xl transition-all min-w-[60px] ${
-              page === 'memory' ? 'text-[var(--text-primary)]' : 'text-[var(--text-tertiary)]'
-            }`}
+      {/* Bottom navigation — floating liquid glass dock */}
+      <nav className="fixed bottom-0 left-0 right-0 z-40 safe-bottom">
+        <div className="max-w-2xl mx-auto px-4 pb-4">
+          <div
+            className="glass-card !rounded-full px-2 py-2 flex items-center justify-between gap-1 overflow-x-auto"
+            style={{ scrollbarWidth: 'none' }}
           >
-            <HeartIcon size={20} />
-            <span className="text-[10px] font-medium">Memory</span>
-          </motion.button>
-
-          {/* Analytics */}
-          <motion.button
-            whileTap={{ scale: 0.9 }}
-            onClick={() => setPage('analytics')}
-            className={`flex flex-col items-center gap-1 px-3 py-2 rounded-xl transition-all min-w-[60px] ${
-              page === 'analytics' ? 'text-[var(--text-primary)]' : 'text-[var(--text-tertiary)]'
-            }`}
-          >
-            <ChartIcon size={20} />
-            <span className="text-[10px] font-medium">Analytics</span>
-          </motion.button>
+            {(Object.keys(TAB_LABELS) as Tab[]).map((tab) => {
+              const isActive = activeTab === tab;
+              return (
+                <button
+                  key={tab}
+                  onClick={() => {
+                    setActiveTab(tab);
+                    haptic('light');
+                  }}
+                  className="relative flex-1 min-w-fit px-3 py-2.5 rounded-full transition-colors"
+                  aria-label={TAB_LABELS[tab]}
+                >
+                  {isActive && (
+                    <motion.span
+                      layoutId="nav-glass-active"
+                      className="absolute inset-0 rounded-full"
+                      style={{
+                        background: 'var(--glass-bg-strong)',
+                        border: '1px solid var(--glass-border)',
+                        boxShadow: '0 4px 16px rgba(0,0,0,0.10)',
+                      }}
+                      transition={{ type: 'spring', stiffness: 420, damping: 36 }}
+                    />
+                  )}
+                  <span
+                    className={`relative technical-text whitespace-nowrap ${
+                      isActive ? 'text-[var(--text-primary)]' : 'text-[var(--text-tertiary)]'
+                    }`}
+                  >
+                    {TAB_LABELS[tab]}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
         </div>
       </nav>
 
-      {/* Add/Edit Modal */}
+      {/* Add/Edit modal */}
       <AddExpenseModal
         isOpen={showAddModal}
-        onClose={handleCloseModal}
-        onSave={addExpense}
-        onUpdate={updateExpense}
+        onClose={() => setShowAddModal(false)}
+        onSave={handleSaveExpense}
+        onUpdate={handleUpdateExpense}
         editExpense={editExpense}
-        currency={settings.currency}
+        currency={currency}
       />
     </div>
   );

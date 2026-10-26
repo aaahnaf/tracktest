@@ -16,6 +16,16 @@
   --border-strong: #d4d4d4;
   --accent: #d5272b;
   --card: #ffffff;
+
+  /* liquid glass tokens */
+  --glass-bg: rgba(255, 255, 255, 0.55);
+  --glass-bg-strong: rgba(255, 255, 255, 0.72);
+  --glass-border: rgba(0, 0, 0, 0.08);
+  --glass-highlight: rgba(255, 255, 255, 0.9);
+  --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.08), 0 2px 8px rgba(0, 0, 0, 0.04);
+  --spot-x: 50vw;
+  --spot-y: 35vh;
+  --noise: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.55'/%3E%3C/svg%3E");
 }
 
 .dark {
@@ -29,6 +39,12 @@
   --border-strong: #404040;
   --accent: #ff3b30;
   --card: #0a0a0a;
+
+  --glass-bg: rgba(18, 18, 20, 0.45);
+  --glass-bg-strong: rgba(12, 12, 14, 0.65);
+  --glass-border: rgba(255, 255, 255, 0.12);
+  --glass-highlight: rgba(255, 255, 255, 0.22);
+  --glass-shadow: 0 8px 40px rgba(0, 0, 0, 0.55), 0 2px 10px rgba(0, 0, 0, 0.4);
 }
 
 * {
@@ -45,6 +61,226 @@ body {
   transition: background-color 0.3s ease, color 0.3s ease;
   overscroll-behavior: none;
   font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
+}
+
+/* ---- Three.js background canvas ---- */
+canvas#wdis-gl {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: -1;
+  pointer-events: none;
+}
+
+/* Cursor spotlight overlay (above canvas, below content) */
+.spotlight-layer {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background: radial-gradient(
+    600px circle at var(--spot-x) var(--spot-y),
+    rgba(120, 120, 130, 0.10),
+    transparent 65%
+  );
+  mix-blend-mode: multiply;
+}
+.dark .spotlight-layer {
+  background: radial-gradient(
+    600px circle at var(--spot-x) var(--spot-y),
+    rgba(255, 255, 255, 0.07),
+    transparent 65%
+  );
+  mix-blend-mode: screen;
+}
+
+/* Film grain over everything */
+.grain-layer {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  pointer-events: none;
+  background-image: var(--noise);
+  background-size: 140px 140px;
+  opacity: 0.05;
+  mix-blend-mode: overlay;
+}
+.dark .grain-layer {
+  opacity: 0.08;
+}
+
+/* ------------------------------------------------------------------ */
+/*  Liquid glass                                                       */
+/* ------------------------------------------------------------------ */
+
+.glass-card {
+  position: relative;
+  isolation: isolate;
+  background: var(--glass-bg);
+  backdrop-filter: blur(22px) saturate(160%) brightness(1.02);
+  -webkit-backdrop-filter: blur(22px) saturate(160%) brightness(1.02);
+  border: 1px solid var(--glass-border);
+  border-radius: 1.25rem;
+  box-shadow: var(--glass-shadow);
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s ease, border-color 0.3s ease;
+  will-change: transform;
+  overflow: hidden;
+}
+
+/* specular highlight that follows the pointer */
+.glass-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  border-radius: inherit;
+  background: radial-gradient(
+    240px circle at var(--mx, 50%) var(--my, -20%),
+    var(--glass-highlight),
+    transparent 60%
+  );
+  opacity: 0;
+  transition: opacity 0.35s ease;
+  mix-blend-mode: soft-light;
+}
+.glass-card:hover::before {
+  opacity: 0.9;
+}
+
+/* refracted top edge (liquid rim light) */
+.glass-card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(
+    140deg,
+    rgba(255, 255, 255, 0.85),
+    rgba(255, 255, 255, 0) 38%,
+    rgba(255, 255, 255, 0) 62%,
+    rgba(255, 255, 255, 0.35)
+  );
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  opacity: 0.55;
+}
+.dark .glass-card::after {
+  background: linear-gradient(
+    140deg,
+    rgba(255, 255, 255, 0.35),
+    rgba(255, 255, 255, 0) 40%,
+    rgba(255, 255, 255, 0) 60%,
+    rgba(255, 255, 255, 0.18)
+  );
+}
+
+/* Glass pills (filters / segmented controls) */
+.glass-pill {
+  padding: 0.5rem 1rem;
+  font-size: 0.75rem;
+  border-radius: 9999px;
+  border: 1px solid var(--glass-border);
+  background: var(--glass-bg);
+  backdrop-filter: blur(14px) saturate(150%);
+  -webkit-backdrop-filter: blur(14px) saturate(150%);
+  color: var(--text-secondary);
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  cursor: pointer;
+}
+.glass-pill:hover {
+  border-color: var(--border-strong);
+  color: var(--text-primary);
+  transform: translateY(-1px);
+}
+.glass-pill-active {
+  background: var(--glass-bg-strong);
+  border-color: var(--text-primary);
+  color: var(--text-primary);
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.12);
+}
+.dark .glass-pill-active {
+  box-shadow: 0 4px 18px rgba(255, 255, 255, 0.06);
+}
+
+/* Ink CTA buttons with specular sweep */
+.ink-button {
+  background: var(--text-primary);
+  color: var(--bg);
+  border-radius: 9999px;
+  font-weight: 500;
+  transition: opacity 0.2s ease, box-shadow 0.3s ease, transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.ink-button:hover {
+  box-shadow: 0 10px 34px rgba(0, 0, 0, 0.22);
+}
+.dark .ink-button:hover {
+  box-shadow: 0 10px 34px rgba(255, 255, 255, 0.16);
+}
+.sheen-sweep {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: -60%;
+  width: 40%;
+  z-index: 5;
+  pointer-events: none;
+  background: linear-gradient(100deg, transparent, rgba(255, 255, 255, 0.55), transparent);
+  transform: skewX(-18deg);
+  opacity: 0;
+}
+.ink-button:hover .sheen-sweep {
+  animation: sheen 0.9s cubic-bezier(0.16, 1, 0.3, 1);
+}
+@keyframes sheen {
+  0% { left: -60%; opacity: 0; }
+  18% { opacity: 1; }
+  100% { left: 130%; opacity: 0; }
+}
+
+/* Magnetic elements */
+.magnetic {
+  display: inline-block;
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: transform;
+}
+
+/* Floating animation */
+@keyframes floaty {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-8px); }
+}
+.animate-floaty {
+  animation: floaty 6s ease-in-out infinite;
+}
+
+/* Number reveal glow */
+@keyframes numberGlow {
+  0% { text-shadow: 0 0 0px transparent; }
+  40% { text-shadow: 0 0 26px rgba(127, 127, 135, 0.35); }
+  100% { text-shadow: 0 0 0px transparent; }
+}
+.number-glow {
+  animation: numberGlow 1.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Marquee ticker */
+@keyframes marquee {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+.marquee-track {
+  display: inline-flex;
+  white-space: nowrap;
+  animation: marquee 36s linear infinite;
+}
+.marquee-wrap:hover .marquee-track {
+  animation-play-state: paused;
 }
 
 /* Custom scrollbar */
@@ -78,7 +314,7 @@ input[type="number"] {
 
 /* Grid lines */
 .grid-lines {
-  background-image: 
+  background-image:
     linear-gradient(var(--border) 1px, transparent 1px),
     linear-gradient(90deg, var(--border) 1px, transparent 1px);
   background-size: 20px 20px;
