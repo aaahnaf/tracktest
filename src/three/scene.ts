@@ -72,7 +72,17 @@ function setTimescale() {
 setTimescale();
 window.addEventListener('wdis:motion', setTimescale);
 
-if (typeof window !== 'undefined') {
+// WebGL support check — on unsupported browsers/devices we skip the entire 3D
+// world so the app still renders normally instead of crashing to a white screen.
+let webglSupported = true;
+try {
+  const c = document.createElement('canvas');
+  webglSupported = !!(c.getContext('webgl2') || c.getContext('webgl'));
+} catch {
+  webglSupported = false;
+}
+
+if (typeof window !== 'undefined' && webglSupported) {
   window.addEventListener('pointermove', (e) => {
     mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
     mouse.y = (e.clientY / window.innerHeight) * 2 - 1;
@@ -734,6 +744,7 @@ window.addEventListener('wdis:page', (e) => {
 /*  Main loop                                                          */
 /* ------------------------------------------------------------------ */
 
+function bootScene() {
 ensureRenderer();
 getBlob();
 getSculpture();
@@ -844,3 +855,20 @@ function tick() {
 }
 
 tick();
+} // end bootScene
+
+// Boot the 3D world only when WebGL is available; otherwise the app runs with
+// its CSS-based glass background and everything still works.
+if (webglSupported) {
+  try {
+    bootScene();
+  } catch (err) {
+    console.warn('Three.js scene failed to start — continuing without 3D.', err);
+    const r = renderer as THREE.WebGLRenderer | null;
+    if (r) {
+      try { r.dispose(); } catch { /* noop */ }
+      renderer = null;
+    }
+    cancelAnimationFrame(raf);
+  }
+}
