@@ -42,6 +42,14 @@ A premium, minimalist, monochrome expense tracker with deep memory features, ins
 - **Theme color** — Adapts to light/dark mode
 - **Standalone mode** — Runs like a native app
 
+### 📲 Android APK Build
+- **GitHub Actions** — Automatic APK builds on push to main/master
+- **Capacitor** — Native Android wrapper for the web app
+- **One-click build** — Download APK from GitHub Actions artifacts
+- **Local build support** — Build APK locally with Android Studio
+- **Signed releases** — Support for signed release APKs
+- **See [BUILD.md](BUILD.md)** for detailed instructions
+
 ### 🎭 Visual Enhancements
 - **Dot matrix backgrounds** — Decorative patterns on cards
 - **Pulsing indicators** — Animated accent dots

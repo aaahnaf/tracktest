@@ -1,9 +1,8 @@
-import { useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Expense, Currency, DEFAULT_CATEGORIES } from '../lib/types';
 import { formatCurrency, getGreeting, getMonthStart, getMonthEnd, formatSmartDate, formatRelativeTime, getInsights } from '../lib/utils';
 import { calculateWorthItStats, detectPatterns } from '../lib/analytics';
-import { calculateGhostMoney, detectAnomalies, calculateTrajectory } from '../lib/advancedAnalytics';
 import { AnimatedNumber } from './AnimatedNumber';
 import { PlusIcon, ArrowRightIcon, TrendUpIcon, TrendDownIcon, FoodIcon, TransportIcon, ShoppingIcon, BillsIcon, EntertainmentIcon, HealthIcon, EducationIcon, OtherIcon } from './Icons';
 import { parseISO, format } from 'date-fns';
@@ -57,18 +56,6 @@ export function Overview({ expenses, currency, onAddExpense, onNavigate }: Overv
   // Memory insights
   const worthItStats = useMemo(() => calculateWorthItStats(thisMonthExpenses), [thisMonthExpenses]);
   const patterns = useMemo(() => detectPatterns(expenses), [expenses]);
-  
-  // Ghost Money
-  const ghostMoney = useMemo(() => calculateGhostMoney(expenses), [expenses]);
-  
-  // Anomalies
-  const anomalies = useMemo(() => detectAnomalies(expenses), [expenses]);
-  
-  // Trajectory
-  const trajectory = useMemo(() => calculateTrajectory(expenses), [expenses]);
-  
-  // Show anomaly detail
-  const [showAnomalyDetail, setShowAnomalyDetail] = useState(false);
   
   // Contextual insight - pick the most relevant one
   const contextualInsight = useMemo(() => {
@@ -217,122 +204,6 @@ export function Overview({ expenses, currency, onAddExpense, onNavigate }: Overv
               {contextualInsight}
             </p>
           </div>
-        </motion.div>
-      )}
-
-      {/* Ghost Money */}
-      {ghostMoney && (
-        <motion.div
-          initial={{ opacity: 0, y: 8 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.25, duration: 0.5 }}
-          className="mb-6 p-4 border border-dashed border-[var(--border-strong)] rounded-2xl"
-        >
-          <div className="flex items-center justify-between mb-2">
-            <div className="flex items-center gap-2">
-              <div className="w-1.5 h-1.5 rounded-full bg-[var(--text-tertiary)] animate-pulse-slow" />
-              <span className="technical-text text-[var(--text-tertiary)]">Ghost Money</span>
-            </div>
-            <span className="text-xs text-[var(--text-tertiary)]">estimated</span>
-          </div>
-          <div className="flex items-baseline gap-3">
-            <p className="text-xl font-light text-[var(--text-tertiary)] large-number line-through opacity-60">
-              {formatCurrency(thisMonthTotal, currency)}
-            </p>
-            <span className="text-[var(--text-tertiary)]">−</span>
-            <p className="text-xl font-light text-[var(--text-tertiary)] large-number">
-              {formatCurrency(ghostMoney.total, currency)}
-            </p>
-            <span className="text-[var(--text-tertiary)]">=</span>
-            <p className="text-2xl font-light text-[var(--text-primary)] large-number">
-              {formatCurrency(thisMonthTotal - ghostMoney.total, currency)}
-            </p>
-          </div>
-          <p className="text-xs text-[var(--text-tertiary)] mt-2 leading-relaxed">
-            Realistic balance after accounting for {ghostMoney.items.length} upcoming commitment{ghostMoney.items.length !== 1 ? 's' : ''}
-          </p>
-        </motion.div>
-      )}
-
-      {/* Anomaly Detector */}
-      {anomalies.length > 0 && (
-        <motion.div
-          initial={{ opacity: 0, y: 8 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3, duration: 0.5 }}
-          className="mb-6"
-        >
-          <button
-            onClick={() => setShowAnomalyDetail(!showAnomalyDetail)}
-            className="w-full p-4 border border-red-200 dark:border-red-900/50 rounded-2xl text-left hover:bg-red-50/50 dark:hover:bg-red-950/10 transition-colors"
-          >
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <div className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse-slow" />
-                <span className="technical-text text-red-500">Find something weird</span>
-              </div>
-              <span className="text-xs text-[var(--text-tertiary)]">
-                {anomalies.length} {anomalies.length === 1 ? 'anomaly' : 'anomalies'}
-              </span>
-            </div>
-            
-            <AnimatePresence>
-              {showAnomalyDetail && (
-                <motion.div
-                  initial={{ opacity: 0, height: 0 }}
-                  animate={{ opacity: 1, height: 'auto' }}
-                  exit={{ opacity: 0, height: 0 }}
-                  transition={{ duration: 0.3 }}
-                  className="overflow-hidden"
-                >
-                  <div className="mt-3 space-y-2">
-                    {anomalies.slice(0, 3).map((anomaly, i) => (
-                      <div key={i} className="p-3 bg-[var(--bg)] rounded-xl">
-                        <p className="text-sm text-[var(--text-primary)]">{anomaly.description}</p>
-                        <p className="text-xs text-[var(--text-tertiary)] mt-1">{anomaly.explanation}</p>
-                      </div>
-                    ))}
-                  </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </button>
-        </motion.div>
-      )}
-
-      {/* Financial Trajectory */}
-      {trajectory && (
-        <motion.div
-          initial={{ opacity: 0, y: 8 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.35, duration: 0.5 }}
-          className="mb-6 p-4 border border-[var(--border)] rounded-2xl"
-        >
-          <div className="flex items-center gap-2 mb-3">
-            <div className="w-1.5 h-1.5 rounded-full bg-[var(--text-primary)]" />
-            <span className="technical-text text-[var(--text-secondary)]">End of month estimate</span>
-          </div>
-          <div className="grid grid-cols-3 gap-3">
-            <div>
-              <p className="text-xs text-[var(--text-tertiary)] mb-1">Best case</p>
-              <p className="text-sm font-medium text-green-600 dark:text-green-400 large-number">
-                {formatCurrency(trajectory.bestCase, currency)}
-              </p>
-            </div>
-            <div>
-              <p className="text-xs text-[var(--text-tertiary)] mb-1">Expected</p>
-              <p className="text-sm font-medium text-[var(--text-primary)] large-number">
-                {formatCurrency(trajectory.expected, currency)}
-              </p>
-            </div>
-            <div>
-              <p className="text-xs text-[var(--text-tertiary)] mb-1">Higher spend</p>
-              <p className="text-sm font-medium text-orange-600 dark:text-orange-400 large-number">
-                {formatCurrency(trajectory.higherSpending, currency)}
-              </p>
-            </div>
-          </div>
-          <p className="text-xs text-[var(--text-tertiary)] mt-2">{trajectory.explanation}</p>
         </motion.div>
       )}
 
