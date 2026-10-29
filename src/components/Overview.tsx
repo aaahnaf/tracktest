@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useMemo, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Expense, Currency, DEFAULT_CATEGORIES } from '../lib/types';
 import { formatCurrency, getGreeting, getMonthStart, getMonthEnd, formatSmartDate, formatRelativeTime, getInsights } from '../lib/utils';
@@ -6,6 +6,7 @@ import { calculateWorthItStats, detectPatterns } from '../lib/analytics';
 import { AnimatedNumber } from './AnimatedNumber';
 import { PlusIcon, ArrowRightIcon, TrendUpIcon, TrendDownIcon, FoodIcon, TransportIcon, ShoppingIcon, BillsIcon, EntertainmentIcon, HealthIcon, EducationIcon, OtherIcon } from './Icons';
 import { parseISO, format } from 'date-fns';
+import { updateWidgetMonthlyTotal, formatWidgetCurrency } from '../lib/widgetService';
 
 interface OverviewProps {
   expenses: Expense[];
@@ -49,6 +50,13 @@ export function Overview({ expenses, currency, onAddExpense, onNavigate }: Overv
   const diff = thisMonthTotal - lastMonthTotal;
   const todayTotal = expenses.filter(e => e.date === format(now, 'yyyy-MM-dd')).reduce((s, e) => s + e.amount, 0);
   const avgPurchase = thisMonthExpenses.length > 0 ? thisMonthTotal / thisMonthExpenses.length : 0;
+
+  // Update Android widget with monthly total
+  useEffect(() => {
+    const formattedTotal = formatWidgetCurrency(thisMonthTotal, currency);
+    const subtitle = `${thisMonthExpenses.length} ${thisMonthExpenses.length === 1 ? 'expense' : 'expenses'}`;
+    updateWidgetMonthlyTotal(formattedTotal, subtitle);
+  }, [thisMonthTotal, thisMonthExpenses.length, currency]);
 
   const recentExpenses = expenses.slice(0, 5);
   const insights = getInsights(expenses, currency);

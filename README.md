@@ -50,6 +50,13 @@ A premium, minimalist, monochrome expense tracker with deep memory features, ins
 - **Signed releases** — Support for signed release APKs
 - **See [BUILD.md](BUILD.md)** for detailed instructions
 
+### 🏠 Android Home Screen Widgets
+- **Spending Summary Widget** — Shows monthly total on home screen
+- **Quick Add Widget** — One-tap access to add expenses
+- **Auto-updates** — Widget refreshes when expenses change
+- **Native integration** — Real Android widgets, not just web shortcuts
+- **See [WIDGETS.md](WIDGETS.md)** for widget documentation
+
 ### 🎭 Visual Enhancements
 - **Dot matrix backgrounds** — Decorative patterns on cards
 - **Pulsing indicators** — Animated accent dots

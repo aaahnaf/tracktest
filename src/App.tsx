@@ -12,6 +12,7 @@ import { Analytics } from './components/Analytics';
 import { Replay } from './components/Replay';
 import { Settings } from './components/Settings';
 import { AddExpenseModal } from './components/AddExpenseModal';
+import { getPendingWidgetAction } from './lib/widgetService';
 
 const NAV_ITEMS: { id: Page; label: string; icon: any }[] = [
   { id: 'overview', label: 'Overview', icon: GridIcon },
@@ -42,6 +43,23 @@ export default function App() {
     } else if (pageParam && ['overview', 'transactions', 'memory', 'analytics', 'replay', 'settings'].includes(pageParam)) {
       setPage(pageParam as Page);
     }
+  }, []);
+
+  // Handle widget actions (from Android home screen widgets)
+  useEffect(() => {
+    const checkWidgetAction = async () => {
+      const action = await getPendingWidgetAction();
+      if (action === 'add') {
+        setShowAddModal(true);
+      }
+    };
+    
+    // Check on mount
+    checkWidgetAction();
+    
+    // Also check periodically in case app was already running
+    const interval = setInterval(checkWidgetAction, 2000);
+    return () => clearInterval(interval);
   }, []);
 
   // Keyboard shortcuts

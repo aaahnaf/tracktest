@@ -18,7 +18,27 @@ Successfully removed the following features as requested:
 - ✅ Clean, simple list of expenses
 - ✅ Removed all complex event detection and analysis
 
-### 3. Android APK Build Infrastructure
+### 3. Android Home Screen Widgets
+Created **2 native Android home screen widgets**:
+
+**Widget 1: Spending Summary**
+- Shows monthly total (e.g., "৳12,450")
+- Displays expense count
+- Auto-updates when expenses change
+- Tap to open app
+
+**Widget 2: Quick Add**
+- One-tap access to add expense modal
+- Bypasses app navigation
+- Perfect for quick expense entry
+
+**Implementation:**
+- Native Java AppWidgetProvider classes
+- Capacitor plugin for web-to-native communication
+- SharedPreferences for data persistence
+- See [WIDGETS.md](WIDGETS.md) for full documentation
+
+### 4. Android APK Build Infrastructure
 Created complete Android build setup using Capacitor:
 
 #### Files Created:
@@ -32,13 +52,23 @@ Created complete Android build setup using Capacitor:
   - `app/build.gradle` - App module build file
   - `app/capacitor.build.gradle` - Capacitor integration
   - `app/proguard-rules.pro` - ProGuard rules
-  - `app/src/main/AndroidManifest.xml` - Android manifest
+  - `app/src/main/AndroidManifest.xml` - Android manifest (with widget receivers)
   - `app/src/main/java/com/whatdidispending/app/MainActivity.java` - Main activity
+  - `app/src/main/java/com/whatdidispending/app/SpendingSummaryWidget.java` - Spending summary widget
+  - `app/src/main/java/com/whatdidispending/app/QuickAddWidget.java` - Quick add widget
+  - `app/src/main/java/com/whatdidispending/app/WidgetDataHelper.java` - Widget data management
+  - `app/src/main/java/com/whatdidispending/app/WidgetDataPlugin.java` - Capacitor plugin for widgets
   - `app/src/main/res/values/strings.xml` - String resources
   - `app/src/main/res/values/styles.xml` - Theme styles
   - `app/src/main/res/values/colors.xml` - Color definitions
   - `app/src/main/res/xml/file_paths.xml` - File provider paths
+  - `app/src/main/res/xml/widget_spending_summary_info.xml` - Widget metadata
+  - `app/src/main/res/xml/widget_quick_add_info.xml` - Widget metadata
+  - `app/src/main/res/layout/widget_spending_summary.xml` - Widget layout
+  - `app/src/main/res/layout/widget_quick_add.xml` - Widget layout
   - `app/src/main/res/drawable/splash.xml` - Splash screen
+  - `app/src/main/res/drawable/widget_background.xml` - Widget background
+- `src/lib/widgetService.ts` - TypeScript interface for widget communication
 
 #### GitHub Actions Workflow:
 - `.github/workflows/build-apk.yml` - Automatic APK build workflow
@@ -105,6 +135,7 @@ The app now has a clean, simple feature set:
 - ✅ Analytics page with charts and insights
 - ✅ Replay page (simplified timeline)
 - ✅ Settings page with currencies and guide
+- ✅ **2 Android home screen widgets** (Spending Summary + Quick Add)
 
 All advanced analysis features have been removed as requested.
 
@@ -134,17 +165,18 @@ To complete the Android setup:
 
 2. **Test the APK** on a device or emulator
 
-3. **For Play Store release:**
+3. **Test the widgets:**
+   - Long press home screen → Widgets
+   - Find "What Did I Spend?" widgets
+   - Add both widgets to home screen
+   - Verify they update when expenses change
+   - Test tap actions
+
+4. **For Play Store release:**
    - Generate a signed keystore
    - Update signing config in build.gradle
    - Build release APK
    - Follow Play Store submission guidelines
-
-4. **Optional: Add home screen widgets**
-   - Requires native Android widget code
-   - Create XML widget layouts
-   - Implement AppWidgetProvider
-   - This is beyond the scope of the current setup
 
 ## 📝 Notes
 
@@ -154,7 +186,10 @@ To complete the Android setup:
 - Works completely offline
 - GitHub Actions will automatically build APKs on every push
 - The APK is a WebView wrapper around the web app
-- For true native widgets, you'd need to write native Android code
+- **Native Android widgets are implemented** using Capacitor plugins
+- Widgets use SharedPreferences to share data between web and native
+- Widget data updates automatically when expenses change
+- See [WIDGETS.md](WIDGETS.md) for detailed widget documentation
 
 ## ✅ Build Status
 
